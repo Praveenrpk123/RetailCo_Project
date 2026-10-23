@@ -1,0 +1,53 @@
+# This is a Declarative Automation Bundle definition for RetailCo_dev.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+bundle:
+  name: RetailCo_dev
+  uuid: 01503b5c-6b34-4eda-bc3d-8c147e3618c5
+
+include:
+  - resources/*.yml
+
+artifacts:
+  python_artifact:
+    type: whl
+    build: uv build --wheel
+
+# Variable declarations. These variables are assigned in the dev/prod targets below.
+# variables:
+#   catalog:
+#     description: The catalog to use
+#   schema:
+#     description: The schema to use
+variables:
+  catalog_name:
+    description: catalog name for my retailCo DAB
+    default: RetailCo_Dev_Catalog
+  schema_name:
+    description: schema name for my retailCo DAB
+    default: RetailCo_Dev_schema
+
+targets:
+  dev:
+    # The default target uses 'mode: development' to create a development copy.
+    # - Deployed resources get prefixed with '[dev my_user_name]'
+    # - Any job schedules and triggers are paused by default.
+    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-164f3733-e24a.cloud.databricks.com/
+    variables:
+      catalog_name: RetailCo_Dev_Catalog
+      schema_name: RetailCo_Dev_schema
+  prod:
+    mode: production
+    workspace:
+      host: http://127.0.0.1:7073
+      # We explicitly deploy to /Workspace/Users/mallikaravipp11@gmail.com to make sure we only have a single copy.
+      root_path: /Workspace/Users/mallikaravipp11@gmail.com/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog_name: RetailCo_Prod_Catalog
+      schema_name: RetailCo_Prod_Schema
+    permissions:
+      - user_name: mallikaravipp11@gmail.com
+        level: CAN_MANAGE

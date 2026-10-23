@@ -1,0 +1,17 @@
+resources:
+  jobs:
+    demo_job:
+      name: demo_job
+      parameters:
+        - name: catalog_name
+          default: ${var.catalog_name}
+        - name: schema_name
+          default: ${var.schema_name}
+      tasks:
+        - task_key: demo_job
+          notebook_task:
+            notebook_path: ../../src/demo.ipynb
+            source: WORKSPACE
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED
