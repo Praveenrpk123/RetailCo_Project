@@ -10,7 +10,8 @@ resources:
       trigger:
         pause_status: UNPAUSED
         file_arrival:
-          url: f"/Volumes/${var.catalog_name}/${var.schema_name}/raw_data/store_events"
+          # no f strings allowed at url
+          url: /Volumes/${var.catalog_name}/${var.schema_name}/raw_data/store_events
       tasks:
         - task_key: Bronze_ingestion
           notebook_task:
