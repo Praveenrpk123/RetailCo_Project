@@ -1,0 +1,116 @@
+resources:
+  jobs:
+    DAB_retailco_pipeline_v2:
+      name: DAB_retailco_pipeline_v2
+      # parameters:
+      #   - name: catalog_name
+      #     default: ${var.catalog_name}
+      #   - name: schema_name
+      #     default: ${var.schema_name}
+      trigger:
+        pause_status: UNPAUSED
+        file_arrival:
+          url: f"/Volumes/{catalog_name}/{schema_name}/raw_data/store_events/"
+      tasks:
+        - task_key: Bronze_ingestion
+          notebook_task:
+            notebook_path: ../../src/Bronze/Bronze_Ingestion.py
+            source: WORKSPACE
+        - task_key: dim_customers
+          depends_on:
+            - task_key: Bronze_ingestion
+          notebook_task:
+            notebook_path: ../../src/Silver/Silver_customer_V2.py
+            source: WORKSPACE
+        - task_key: dim_products
+          depends_on:
+            - task_key: Bronze_ingestion
+          notebook_task:
+            notebook_path: ../../src/Silver/Silver_Products_V2.py
+            source: WORKSPACE
+        - task_key: fact_orders
+          depends_on:
+            - task_key: dim_products
+            - task_key: dim_customers
+          notebook_task:
+            notebook_path: ../../src/Silver/Silver_Products_V2.py
+            source: WORKSPACE
+        - task_key: fact_returns
+          depends_on:
+            - task_key: fact_orders
+          notebook_task:
+            notebook_path: ../../src/Silver/Silver_Returns_V2.py
+            source: WORKSPACE
+        - task_key: fact_store_events
+          depends_on:
+            - task_key: fact_orders
+          notebook_task:
+            notebook_path: ../../src/Silver/Silver_store_events_V2.py
+            source: WORKSPACE
+        - task_key: customer_kpis
+          depends_on:
+            - task_key: fact_returns
+            - task_key: fact_store_events
+          notebook_task:
+            notebook_path: ../../src/gold/KPI_customer/customers_kpi.py
+            source: WORKSPACE
+        - task_key: orders_kpi
+          depends_on:
+            - task_key: fact_returns
+            - task_key: fact_store_events
+          notebook_task:
+            notebook_path: ../../src/gold/KPI_orders/orders_kpi_V2.py
+            source: WORKSPACE
+        - task_key: products_kpi
+          depends_on:
+            - task_key: fact_store_events
+            - task_key: fact_returns
+          notebook_task:
+            notebook_path: ../../src/gold/KPI_products/products_kpi.py
+            source: WORKSPACE
+        - task_key: returns_kpi
+          depends_on:
+            - task_key: fact_returns
+            - task_key: fact_store_events
+          notebook_task:
+            notebook_path: ../../src/gold/KPI_returns/returns_kpi.py
+            source: WORKSPACE
+        - task_key: store_events_kpi
+          depends_on:
+            - task_key: fact_returns
+            - task_key: fact_store_events
+          notebook_task:
+            notebook_path: ../../src/gold/KPI_store_events/store_events_kpi.py
+            source: WORKSPACE
+        - task_key: job_logs
+          depends_on:
+            - task_key: customer_kpis
+            - task_key: orders_kpi
+            - task_key: products_kpi
+            - task_key: store_events_kpi
+            - task_key: returns_kpi
+          notebook_task:
+            notebook_path: ../../src/Job_logs/table_update.py
+            source: WORKSPACE
+      queue:
+        enabled: true
+      parameters:
+        - name: catalog_name
+          default: ${var.catalog_name}
+        - name: schema_name
+          default: ${var.schema_name}
+        - name: Job_datetime
+          default: "{{job.start_time.iso_datetime}}"
+        - name: Run_id
+          default: "{{job.run_id}}"
+        - name: Job_id
+          default: "{{job.id}}"
+        - name: Job_name
+          default: "{{job.name}}"
+        - name: No_of_retries
+          default: "{{job.repair_count}}"
+        - name: Trigger_datetime
+          default: "{{job.trigger.time.iso_datetime}}"
+        - name: Trigger_type
+          default: "{{job.trigger.type}}"
+      performance_target: PERFORMANCE_OPTIMIZED
