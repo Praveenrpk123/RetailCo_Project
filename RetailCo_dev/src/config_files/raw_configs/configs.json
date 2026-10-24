@@ -1,0 +1,23 @@
+{
+    "config" : [
+    {
+    "filename" : "customers",
+    "fileformat" : "csv"
+    },
+    {
+    "filename" : "products",
+    "fileformat" : "json"
+    },
+    {
+    "filename" : "orders",
+    "fileformat" : "parquet"
+    },
+    {
+    "filename" : "store_events",
+    "fileformat" : "json"
+    },
+    {
+    "filename" : "returns",
+    "fileformat" : "csv"
+    }]
+}

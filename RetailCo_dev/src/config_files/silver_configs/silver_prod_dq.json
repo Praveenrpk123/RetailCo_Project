@@ -1,0 +1,69 @@
+{
+  "configs" : [
+    {
+      "check" : "Not_Null",
+      "col_name" : "product_id",
+      "enabled" : true
+    },
+    {
+      "check" : "Not_Null",
+      "col_name" : "supplier_id",
+      "enabled" : true
+    },
+    {
+      "check" : "Not_Null",
+      "col_name" : "category",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_handling",
+      "col_name" : "cost_price",
+      "check_type" : "int",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_handling",
+      "col_name" : "selling_price",
+      "check_type" : "int",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_handling",
+      "col_name" : "stock_qty",
+      "check_type" : "int",
+      "enabled" : true
+    },
+    {
+      "check" : "gt_zero",
+      "col_name" : "cost_price",
+      "value_to_ck" : 0,
+      "enabled" : true
+    },
+    {
+      "check" : "gt_zero",
+      "col_name" : "selling_price",
+      "value_to_ck" : 0,
+      "enabled" : true
+    },
+    {
+      "check" : "gt_zero",
+      "col_name" : "stock_qty",
+      "value_to_ck" : 0,
+      "enabled" : true
+    },
+    {
+      "check" : "pattern",
+      "col_name" : "product_id",
+      "starts_with" : "PROD",
+      "ends_with" : "none",
+      "enabled" : true
+    },
+    {
+      "check" : "pattern",
+      "col_name" : "supplier_id",
+      "starts_with" : ["SUP", "SUP"],
+      "ends_with" : "none",
+      "enabled" : true
+    }
+  ]
+}

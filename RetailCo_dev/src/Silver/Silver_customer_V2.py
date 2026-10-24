@@ -212,7 +212,7 @@ display(df)
 # df.withColumn('phone', when((~(col('phone').startswith('+91'))),concat(lit('+91-'), col('phone'))).otherwise(replace(col('phone'),lit('+91'), lit('+91-')))).limit(10).display()
 
 #getting the dq file for customers from config path for data validation check
-path = os.path.abspath('../../config_files/silver_configs/silver_cust_dq.json')
+path = os.path.abspath('../config_files/silver_configs/silver_cust_dq.json')
 
 with open(path, 'r') as f:
     configs = json.load(f)

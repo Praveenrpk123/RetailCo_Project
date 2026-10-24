@@ -155,7 +155,7 @@ df = df.\
 
 # COMMAND ----------
 
-path = os.path.abspath('../../config_files/silver_configs/silver_prod_dq.json')
+path = os.path.abspath('../config_files/silver_configs/silver_prod_dq.json')
 with open(path, 'r') as f:
     configs = json.load(f)
     # print(configs['configs'])

@@ -1,0 +1,109 @@
+{
+  "configs" : [
+    {
+      "check" : "Not_Null",
+      "col_name" : "order_id",
+      "enabled" : true
+    },
+    {
+      "check" : "Not_Null",
+      "col_name" : "customer_id",
+      "enabled" : true
+    },
+    {
+      "check" : "Not_Null",
+      "col_name" : "product_id",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_handling",
+      "col_name" : "delivery_days",
+      "check_type" : "int",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_handling",
+      "col_name" : "quantity",
+      "check_type" : "int",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_handling",
+      "col_name" : "unit_price",
+      "check_type" : "double",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_handling",
+      "col_name" : "discount_pct",
+      "check_type" : "double",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_handling",
+      "col_name" : "total_amount",
+      "check_type" : "double",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_handling",
+      "col_name" : "order_date",
+      "check_type" : "date",
+      "enabled" : true
+    },
+    {
+      "check" : "pattern",
+      "col_name" : "order_id",
+      "starts_with" : "ORD",
+      "enabled" : true
+    },
+    {
+      "check" : "greater_than",
+      "col_name" : "quantity",
+      "value_to_ck" : 0,
+      "enabled" : true
+    },
+    {
+      "check" : "greater_than",
+      "col_name" : "unit_price",
+      "value_to_ck" : 0,
+      "enabled" : true
+    },
+    {
+      "check" : "greater_than",
+      "col_name" : "delivery_days",
+      "value_to_ck" : 1,
+      "enabled" : true
+    },
+    {
+      "check" : "greater_than",
+      "col_name" : "total_amount",
+      "value_to_ck" : 1,
+      "enabled" : true
+    },
+    {
+      "check" : "less_than",
+      "col_name" : "discount_pct",
+      "value_to_ck" : 1,
+      "enabled" : true
+    },
+    {
+      "col_name" : "status",
+      "check" : "sequence_ck",
+      "check_list" : ["Returned", "Shipped", "Delivered", "Cancelled", "Processing"],
+      "enabled" : true
+    },
+    {
+      "col_name" : "payment_method",
+      "check" : "sequence_ck",
+      "check_list" : ["Credit Card", "Wallet", "Debit Card", "UPI", "COD", "Net Banking"],
+      "enabled" : true
+    },
+    {
+      "check" : "less_than",
+      "col_name" : "order_date",
+      "value_to_ck" : "current_date",
+      "enabled" : true
+    }
+  ]
+}

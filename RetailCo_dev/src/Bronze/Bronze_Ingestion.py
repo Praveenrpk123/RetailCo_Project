@@ -58,7 +58,7 @@ catalog_name = ''
 schema_name = ''
 # src_path and getting the config files
 src_loc = "/Volumes/{catalog_name}/{schema_name}/raw_data/"
-path = os.path.abspath('../../config_files/raw_configs/configs.json')
+path = os.path.abspath('../config_files/raw_configs/configs.json')
 # print(path)
 
 # Using autoloader for the ingesting and loading in bronze layer.
