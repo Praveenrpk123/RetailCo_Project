@@ -1,0 +1,73 @@
+{
+  "configs" : [
+    {
+      "col_name" : "customer_id",
+      "check" : "Not_Null",
+      "enabled" : true
+    },
+    {
+      "col_name" : "customer_name",
+      "check" : "Not_Null",
+      "enabled" : true
+    },
+    {
+      "col_name" : "customer_email",
+      "check" : "Not_Null",
+      "enabled" : true
+    },
+    {
+      "col_name" : "customer_id",
+      "check" : "pattern", 
+      "starts_with" : "CUST",
+      "ends_with" : "none",
+      "enabled" : true
+    }, 
+    {
+      "col_name" : "customer_email",
+      "check" : "pattern", 
+      "starts_with" : "none",
+      "ends_with" : ["@example.com", "@example.org", "example.net"],
+      "enabled" : true
+    },
+    {
+      "col_name" : "phone",
+      "check" : "phone",
+      "enabled" : true
+    },
+    {
+      "col_name" : "registration_date",
+      "check" : "validity",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_val",
+      "col_name" : "registration_date",
+      "check_type" : "date",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_val",
+      "col_name" : "city",
+      "check_type" : "string",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_val",
+      "col_name" : "customer_id",
+      "check_type" : "string",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_val",
+      "col_name" : "customer_email",
+      "check_type" : "string",
+      "enabled" : true
+    },
+    {
+      "check" : "datatype_val",
+      "col_name" : "customer_name",
+      "check_type" : "string",
+      "enabled" : true
+    }
+  ]
+}

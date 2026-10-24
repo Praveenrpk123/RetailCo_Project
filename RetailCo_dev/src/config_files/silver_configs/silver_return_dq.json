@@ -1,0 +1,37 @@
+{
+  "configs" : [
+    {
+      "check" : "Not_Null",
+      "col_name" : "return_id",
+      "enabled" : true
+    },
+    {
+      "check" : "Not_Null",
+      "col_name" : "product_id",
+      "enabled" : true
+    },
+    {
+      "check" : "Not_Null",
+      "col_name" : "customer_id",
+      "enabled" : true
+    },
+    {
+      "check" : "Not_Null",
+      "col_name" : "order_id",
+      "enabled" : true
+    },
+    {
+      "check" : "date_dataType_check",
+      "col_name" : "return_date",
+      "check_type" : "date",
+      "enabled" : true
+    },
+    {
+      "check" : "greater_than",
+      "value_to_ck" : 0 ,
+      "col_name" : "refund_amount",
+      "enabled" : true
+
+    }
+  ]
+}

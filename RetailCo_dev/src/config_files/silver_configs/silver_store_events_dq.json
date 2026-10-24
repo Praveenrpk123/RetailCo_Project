@@ -1,0 +1,32 @@
+{
+  "configs" : [
+    {
+      "col_name" : "customer_id",
+      "check" : "Not_Null",
+      "enabled" : true
+    },
+    {
+      "col_name" : "event_id",
+      "check" : "Not_Null",
+      "enabled" : true
+    }, 
+    {
+      "col_name" : "event_type",
+      "check" : "Sequence_ck",
+      "check_list" : ["order_placed", "checkout_start", "payment_initiated", "add_to_cart", "page_view", "order_cancelled"],
+      "enabled" : true
+    },
+    {
+      "col_name" : "device",
+      "check" : "Sequence_ck",
+      "check_list" : ["Web", "Ios", "Android", "Tablet"],
+      "enabled" : true
+    },
+    {
+      "col_name" : "timestamp",
+      "check" : "date_dataType_check",
+      "check_type" : "timestamp",
+      "enabled" : true
+    }
+  ]
+}

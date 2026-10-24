@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
 # MAGIC %md
 # MAGIC ###Importing required libraries
 
@@ -137,7 +141,7 @@ df = df_standardize.\
 
 # COMMAND ----------
 
-path = os.path.abspath('../../config_files/silver_configs/silver_return_dq.json')
+path = os.path.abspath('../config_files/silver_configs/silver_return_dq.json')
 with open(path, 'r') as f:
     configs = json.load(f)
     config_val = configs['configs']

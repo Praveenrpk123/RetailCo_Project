@@ -157,7 +157,7 @@ display(df_standardize.limit(10))
 # COMMAND ----------
 
 import os
-path = os.path.abspath('../../config_files/silver_configs/silver_store_events_dq.json')
+path = os.path.abspath('../config_files/silver_configs/silver_store_events_dq.json')
 with open(path, 'r') as f:
     config = json.load(f)
     rc_dq = retailco_dq(spark)

@@ -182,7 +182,7 @@ df = df_hash.withColumn("rn",
 
 # COMMAND ----------
 
-path = os.path.abspath('../../config_files/silver_configs/silver_orders_dq.json')
+path = os.path.abspath('../config_files/silver_configs/silver_orders_dq.json')
 with open(path, 'r') as f:
     config = json.load(f)
     for i in config['configs']:
