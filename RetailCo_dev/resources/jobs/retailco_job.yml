@@ -11,7 +11,7 @@ resources:
         pause_status: UNPAUSED
         file_arrival:
           # no f strings allowed at url
-          url: /Volumes/${var.catalog_name}/${var.schema_name}/raw_data/store_events
+          url: /Volumes/${var.catalog_name}/${var.schema_name}/raw_data/store_events/
       tasks:
         - task_key: Bronze_ingestion
           notebook_task:
