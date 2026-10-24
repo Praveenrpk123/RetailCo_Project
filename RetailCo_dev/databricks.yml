@@ -40,8 +40,8 @@ targets:
     workspace:
       host: https://dbc-164f3733-e24a.cloud.databricks.com/
     variables:
-      catalog_name: RetailCo_Dev_Catalog
-      schema_name: RetailCo_Dev_schema
+      catalog_name: retailco_dev_catalog
+      schema_name: retailCo_dev_schema
   prod:
     mode: production
     workspace:
@@ -49,8 +49,8 @@ targets:
       # We explicitly deploy to /Workspace/Users/mallikaravipp11@gmail.com to make sure we only have a single copy.
       root_path: /Workspace/Users/mallikaravipp11@gmail.com/.bundle/${bundle.name}/${bundle.target}
     variables:
-      catalog_name: RetailCo_Prod_Catalog
-      schema_name: RetailCo_Prod_Schema
+      catalog_name: retailCo_prod_catalog
+      schema_name: retailCo_prod_Schema
     permissions:
       - user_name: mallikaravipp11@gmail.com
         level: CAN_MANAGE
