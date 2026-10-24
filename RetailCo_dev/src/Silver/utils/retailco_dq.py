@@ -1,0 +1,331 @@
+class retailco_dq():
+    # from pyspark.sql.functions import col, filter, count, lit
+    def __init__(self, spark):
+        from pyspark.sql.functions import col, filter, count, lit
+        # print("Starting data quality checks")
+        self.total_checks = 0
+        self.perc = 0
+        self.spark = spark
+    
+    def not_null_check(self, job_id, run_id, table_name, check, df, col_name, catalog_name, schema_name ):
+        print(f"starting {check} for the col {col_name}")
+        from pyspark.sql.functions import col, filter, count, lit
+        older_count = df.count()
+        df = df.filter(col(f'{col_name}').isNotNull())
+        new_count = df.count()
+        final_cnt = older_count - new_count
+        self.total_checks += 1
+        if final_cnt == 0:
+            self.perc = 100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        else:
+            self.prac = (1 - (final_cnt/older_count))*100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
+        return df, msg
+    
+    def str_startswith_check(self, job_id, run_id, table_name, check, df, col_name, starts_with, catalog_name, schema_name ):
+        print(f"starting {check} for the col {col_name}")
+        from pyspark.sql.functions import col, filter, count, lit
+        older_count = df.count()
+        df = df.filter(col(f'{col_name}').rlike(f'^{starts_with}[0-9]+$'))
+        new_count = df.count()
+        final_cnt = older_count - new_count
+        self.total_checks += 1
+        if final_cnt == 0:
+            self.perc = 100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        else:
+            self.prac = (1 - (final_cnt/older_count))*100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
+        return df, msg
+
+    def lst_startswith_check(self, job_id, run_id, table_name, check, df, col_name, starts_with, catalog_name, schema_name):
+        print(f"starting {check} for the col {col_name}")
+        from pyspark.sql.functions import col, filter, count, lit
+        from functools import reduce
+        older_count = df.count()
+        df = df.filter(reduce(lambda x, y : x | y , [col(f'{col_name}').startswith(i) for i in starts_with]))
+        new_count = df.count()
+        final_cnt = older_count - new_count
+        self.total_checks += 1
+        if final_cnt == 0:
+            self.perc = 100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        else:
+            self.prac = (1 - (final_cnt/older_count))*100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
+        return df, msg
+
+
+    def str_endswith_check(self, job_id, run_id, table_name, check, df, col_name, ends_with, catalog_name, schema_name):
+        print(f"starting {check} for the col {col_name}")
+        from pyspark.sql.functions import col, filter, count, lit
+        older_count = df.count()
+        df = df.filter(col(f'{col_name}').endswith(f'{ends_with}'))
+        new_count = df.count()
+        final_cnt = older_count - new_count
+        self.total_checks += 1
+        if final_cnt == 0:
+            self.perc = 100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        else:
+            self.prac = (1 - (final_cnt/older_count))*100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
+        return df, msg
+
+
+    def lst_endswith_check(self, job_id, run_id, table_name, check, df, col_name, ends_with,catalog_name, schema_name):
+        print(f"starting {check} for the col {col_name}")
+        from pyspark.sql.functions import col, filter, count, lit
+        from functools import reduce
+        older_count = df.count()
+        df = df.\
+            filter(reduce(lambda x, y : x | y , [col(f'{col_name}').endswith(p) for p in ends_with]))
+        new_count = df.count()
+        final_cnt = older_count - new_count
+        self.total_checks += 1
+        if final_cnt == 0:
+            self.perc = 100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        else:
+            self.prac = (1 - (final_cnt/older_count))*100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
+        return df, msg
+
+    def phone_pattern_check(self, job_id, run_id, table_name, check, df, col_name, catalog_name, schema_name):
+        print(f"starting {check} for the col {col_name}")
+        from pyspark.sql.functions import col, lit, length, when, substring
+        older_count = df.count()
+        df = df.\
+            withColumn(f'{col_name}', 
+                when((col(f'{col_name}').startswith('+91')) & (length(col(f'{col_name}')) ==13), 
+                            substring(col(f'{col_name}'), 4, length(col(f'{col_name}'))).cast('bigint')).\
+                when(col(f'{col_name}').startswith('91') & (length(col(f'{col_name}')) == 10) , 
+                            substring(col(f'{col_name}'), 1, length(col(f'{col_name}'))).cast('bigint')).\
+                when(col(f'{col_name}').startswith('91') & (length(col(f'{col_name}')) == 12) , 
+                            substring(col(f'{col_name}'), 3, length(col(f'{col_name}'))).cast('bigint')).\
+                when((col(f'{col_name}').startswith('0')) & (length(col(f'{col_name}')) == 11), 
+                            substring(col(f'{col_name}'), 2, length(col(f'{col_name}'))).cast('bigint')).\
+                when((~(col(f'{col_name}').startswith('+91'))) & 
+                            (~(col(f'{col_name}').startswith('91'))) & 
+                            (length(col(f'{col_name}')) == 10), 
+                            col(f'{col_name}').cast('bigint')).\
+                otherwise(lit('0000000000').cast('bigint'))).filter(col(f'{col_name}') != 0000000000)
+        new_count = df.count()
+        final_cnt = older_count - new_count
+        self.total_checks += 1
+        if final_cnt == 0:
+            self.perc = 100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        else:
+            self.prac = (1 - (final_cnt/older_count))*100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
+        return df, msg
+
+    
+    def date_validity_check(self, job_id, run_id, table_name, check, df, col_name, catalog_name, schema_name):
+        print(f"starting {check} for the col {col_name}")
+        from datetime import date, timedelta
+        from pyspark.sql.functions import col, to_date, filter
+        end_date = date.today() + timedelta(days = 1)
+        older_count = df.count()
+        df = df.withColumn(f'{col_name}', 
+                    to_date(col(f'{col_name}'),'yyyy-MM-dd')).\
+                    filter(col(f'{col_name}') <= end_date)
+        new_count = df.count()
+        final_cnt = older_count - new_count
+        self.total_checks += 1
+        if final_cnt == 0:
+            self.perc = 100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        else:
+            self.prac = (1 - (final_cnt/older_count))*100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
+        return df, msg
+    
+    def datatype_check(self, job_id, run_id, table_name, check, check_type, df, col_name, catalog_name, schema_name):
+        print(f"starting {check} for the col {col_name}")
+        from pyspark.sql.functions import col, filter, cast, count
+        older_count  = df.count()
+        df = df.filter(col(f'{col_name}').cast(f'{check_type}').isNotNull()).\
+            withColumn(f'{col_name}', col(f'{col_name}').cast(f'{check_type}'))
+        new_count = df.count()
+        final_cnt = older_count - new_count
+        self.total_checks += 1
+        if final_cnt == 0:
+            self.perc = 100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        else:
+            self.prac = (1 - (final_cnt/older_count))*100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
+        return df, msg
+    
+    def gt_date_check(self, job_id, run_id, table_name, check, df, col_name, date_val, catalog_name, schema_name):
+        from pyspark.sql.functions import count, col, filter, lit
+        older_count = df.count()
+        df = df.filter(col(f'{i["col_name"]}') > lit(date_val))
+        new_count = df.count()
+        final_cnt = older_count - new_count
+        self.total_checks += 1
+        if final_cnt == 0:
+            self.perc = 100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        else:
+            self.prac = (1 - (final_cnt/older_count))*100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
+        return df, msg
+    
+    def gt_value_check(self, job_id, run_id, table_name, check, df, col_name, value_to_ck, catalog_name, schema_name):
+        from pyspark.sql.functions import count, filter, col, lit
+        older_count = df.count()
+        df = df.filter(col(f'{col_name}') > value_to_ck)
+        new_count = df.count()
+        final_cnt = older_count - new_count
+        self.total_checks += 1
+        if final_cnt == 0:
+            self.perc = 100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        else:
+            self.prac = (1 - (final_cnt/older_count))*100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
+        return df, msg
+    
+    def lt_date_check(self, job_id, run_id, table_name, check, df, col_name, date_val, catalog_name, schema_name):
+        from pyspark.sql.functions import count, col, filter, lit
+        older_count = df.count()
+        df = df.filter(col(f'{col_name}') < lit(date_val))
+        new_count = df.count()
+        final_cnt = older_count - new_count
+        self.total_checks += 1
+        if final_cnt == 0:
+            self.perc = 100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        else:
+            self.prac = (1 - (final_cnt/older_count))*100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
+        return df, msg
+    
+    def lt_value_check(self, job_id, run_id, table_name, check, df, col_name, value_to_ck, catalog_name, schema_name):
+        from pyspark.sql.functions import count, filter, col, lit
+        older_count = df.count()
+        df = df.filter(col(f'{col_name}') < value_to_ck)
+        new_count = df.count()
+        final_cnt = older_count - new_count
+        self.total_checks += 1
+        if final_cnt == 0:
+            self.perc = 100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        else:
+            self.prac = (1 - (final_cnt/older_count))*100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
+        return df, msg
+
+    def sequence_check(self, job_id, run_id, table_name, check, df, col_name, check_list, catalog_name, schema_name):
+        from pyspark.sql.functions import count, filter, col, lit
+        older_count = df.count()
+        df = df.filter(~(col(f'{col_name}').isin(f'{check_list}')))
+        new_count = df.count()
+        final_cnt = older_count - new_count
+        self.total_checks += 1
+        if final_cnt == 0:
+            self.perc = 100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        else:
+            self.prac = (1 - (final_cnt/older_count))*100
+            self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
+                job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
+                values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
+                    '{final_cnt}', '{self.perc}', current_timestamp())""")
+        msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
+        return df, msg
+    
+
+
+    
