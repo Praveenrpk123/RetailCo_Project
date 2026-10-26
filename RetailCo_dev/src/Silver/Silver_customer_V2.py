@@ -113,6 +113,23 @@ if df.count() == 0:
                 (job_id , job_name, run_id, table_name, rows_read, rows_written, job_datetime ,no_of_retries ,trigger_type ,trigger_datetime) 
                 values 
                 ('{job_id}', '{job_name}', '{run_id}', '{tn}' ,'{init_cnt}' , '{final_cnt}', '{job_datetime}' , '{no_of_retries}' ,'{trigger_type}' ,'{trigger_datetime}');""")
+    else:
+        spark.sql("""create or replace table {catalog_name}.{schema_name}.job_logs(
+                job_id string,
+                job_name string,
+                run_id string,
+                table_name string,
+                rows_read int,
+                rows_written int,
+                timetaken string, 
+                job_datetime string,
+                no_of_retries string,
+                trigger_type string,
+                trigger_datetime string)""")
+        spark.sql(f"""insert into {catalog_name}.{schema_name}.job_logs
+                (job_id , job_name, run_id, table_name, rows_read, rows_written, job_datetime ,no_of_retries ,trigger_type ,trigger_datetime) 
+                values 
+                ('{job_id}', '{job_name}', '{run_id}', '{tn}' ,'{init_cnt}' , '{final_cnt}', '{job_datetime}' , '{no_of_retries}' ,'{trigger_type}' ,'{trigger_datetime}');""")
     
     
     # logger.info("No records found. Skipping processing.")
