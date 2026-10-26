@@ -34,7 +34,7 @@ resources:
             - task_key: dim_products
             - task_key: dim_customers
           notebook_task:
-            notebook_path: ../../src/Silver/Silver_Products_V2.py
+            notebook_path: ../../src/Silver/Silver_orders_V2.py
             source: WORKSPACE
         - task_key: fact_returns
           depends_on:
