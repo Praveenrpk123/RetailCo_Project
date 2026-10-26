@@ -114,7 +114,7 @@ if df.count() == 0:
                 values 
                 ('{job_id}', '{job_name}', '{run_id}', '{tn}' ,'{init_cnt}' , '{final_cnt}', '{job_datetime}' , '{no_of_retries}' ,'{trigger_type}' ,'{trigger_datetime}');""")
     else:
-        spark.sql("""create or replace table {catalog_name}.{schema_name}.job_logs(
+        spark.sql(f"""create or replace table {catalog_name}.{schema_name}.job_logs(
                 job_id string,
                 job_name string,
                 run_id string,

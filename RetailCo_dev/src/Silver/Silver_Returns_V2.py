@@ -58,7 +58,7 @@ tgt = 'silver'
 tn = 'fact_returns'
 max_timestamp = ''
 
-ts_val = spark.sql(f"""select coalesce(max_timestamp,timestamp('9999-12-31')) as max_dt from {catalog_name}.{schema_name}control_table where src_layer = '{src}' and tgt_layer = '{tgt}' and table_name = '{tn}';""")
+ts_val = spark.sql(f"""select coalesce(max_timestamp,timestamp('9999-12-31')) as max_dt from {catalog_name}.{schema_name}.control_table where src_layer = '{src}' and tgt_layer = '{tgt}' and table_name = '{tn}';""")
 
 print(len(ts_val.collect()))
 #ts.collect() will return a list. if len of list is not equal to zero, gets from control table else default value
@@ -185,15 +185,15 @@ print(df_dq.count())
 # COMMAND ----------
 
 #dim customers
-df_cust_join = spark.read.table(f'{catalog_name}.{schema_name}dim_customers').\
+df_cust_join = spark.read.table(f'{catalog_name}.{schema_name}.dim_customers').\
     filter(col('is_active') == True)
 
 #dim products
-df_prod_join = spark.read.table(f'{catalog_name}.{schema_name}dim_products').\
+df_prod_join = spark.read.table(f'{catalog_name}.{schema_name}.dim_products').\
     filter(col('is_active') == True)
 
 #fact_orders
-df_order_join =  spark.read.table(f'{catalog_name}.{schema_name}fact_orders')
+df_order_join =  spark.read.table(f'{catalog_name}.{schema_name}.fact_orders')
 # df_order_join.count()
 
 #Joining final results based on dim customer table and exchanging customer_id with customer_sk
@@ -255,16 +255,16 @@ max_ts = df_final.select(max(col('ingested_timestamp')).alias('max_dt'))
 max_dt =  max_ts.collect()[0]['max_dt']
 
 #If a particular table exists
-if spark.catalog.tableExists(f'{catalog_name}.{schema_name}fact_returns'):
+if spark.catalog.tableExists(f'{catalog_name}.{schema_name}.fact_returns'):
 
     #Getting Target Delta table
-    target = DeltaTable.forName(spark, f'{catalog_name}.{schema_name}fact_returns')
+    target = DeltaTable.forName(spark, f'{catalog_name}.{schema_name}.fact_returns')
     target_df = target.toDF()
 
     #if target is not an empty table
     if target_df.count() > 0:
         spark.sql(f"""
-                  merge into {catalog_name}.{schema_name}fact_returns as target
+                  merge into {catalog_name}.{schema_name}.fact_returns as target
                   using returns_view as source
                   on target.return_id = source.return_id
                   when matched and source.primary_record_hash != target.primary_record_hash then update set 
@@ -316,23 +316,23 @@ if spark.catalog.tableExists(f'{catalog_name}.{schema_name}fact_returns'):
                   """)
         
         #Removing record for this table and adding a new record for the table
-        spark.sql(f"""delete from {catalog_name}.{schema_name}control_table 
+        spark.sql(f"""delete from {catalog_name}.{schema_name}.control_table 
               where src_layer = '{src}' and tgt_layer = '{tgt}' and table_name = '{tn}';""")
     
-        spark.sql(f"""insert into {catalog_name}.{schema_name}control_table
+        spark.sql(f"""insert into {catalog_name}.{schema_name}.control_table
               (src_layer, tgt_layer, table_name, max_timestamp, is_active, ct_ingested_timestamp)
               values
               ('{src}', '{tgt}', '{tn}', '{max_dt}', true, current_timestamp());""")
       
         #Updating Job logs      
-        spark.sql(f"""insert into {catalog_name}.{schema_name}job_logs
+        spark.sql(f"""insert into {catalog_name}.{schema_name}.job_logs
               (job_id , job_name, run_id , table_name, rows_read, rows_written, job_datetime ,no_of_retries ,trigger_type ,trigger_datetime) 
               values 
               ('{job_id}', '{job_name}', '{run_id}' , '{tn}', '{init_cnt}' , '{final_cnt}', '{job_datetime}' , '{no_of_retries}' ,'{trigger_type}' ,'{trigger_datetime}');""")
     else:
         #If it is an empty table
         spark.sql(f"""
-               Insert into {catalog_name}.{schema_name}fact_returns(
+               Insert into {catalog_name}.{schema_name}.fact_returns(
                     return_id, 
                     order_sk,
                     product_sk,
@@ -366,12 +366,12 @@ if spark.catalog.tableExists(f'{catalog_name}.{schema_name}fact_returns'):
         
         #Removing record for this table and adding a new record for the table
         spark.sql(f"""
-            delete from {catalog_name}.{schema_name}control_table
+            delete from {catalog_name}.{schema_name}.control_table
             where src_layer = '{src}' and tgt_layer = '{tgt}' and table_name = '{tn}';
             """)
     
         spark.sql(f"""
-            insert into {catalog_name}.{schema_name}control_table
+            insert into {catalog_name}.{schema_name}.control_table
             (
             src_layer, 
             tgt_layer, 
@@ -392,7 +392,7 @@ if spark.catalog.tableExists(f'{catalog_name}.{schema_name}fact_returns'):
             """)
     
     #Updating Job logs
-    spark.sql(f"""insert into {catalog_name}.{schema_name}job_logs
+    spark.sql(f"""insert into {catalog_name}.{schema_name}.job_logs
               (job_id , job_name, run_id , table_name, rows_read, rows_written, job_datetime ,no_of_retries ,trigger_type ,trigger_datetime) 
               values 
               ('{job_id}', '{job_name}', '{run_id}' , '{tn}', '{init_cnt}' , '{final_cnt}', '{job_datetime}' , '{no_of_retries}' ,'{trigger_type}' ,'{trigger_datetime}');""")
@@ -401,7 +401,7 @@ else:
     #if such no table exists
     #create a table and insert records in it.
     spark.sql(f"""
-              CREATE TABLE IF NOT EXISTS {catalog_name}.{schema_name}fact_returns (
+              CREATE TABLE IF NOT EXISTS {catalog_name}.{schema_name}.fact_returns (
                 return_sk bigint GENERATED BY DEFAULT AS IDENTITY primary key,
                 return_id string,
                 order_sk long,
@@ -421,7 +421,7 @@ else:
             """)
     
     spark.sql(f"""
-               Insert into {catalog_name}.{schema_name}fact_returns(
+               Insert into {catalog_name}.{schema_name}.fact_returns(
                     return_id, 
                     order_sk,
                     product_sk,
@@ -455,12 +455,12 @@ else:
     
     #Removing record for this table and adding a new record for the table
     spark.sql(f"""
-            delete from {catalog_name}.{schema_name}control_table
+            delete from {catalog_name}.{schema_name}.control_table
             where src_layer = '{src}' and tgt_layer = '{tgt}' and table_name = '{tn}';
             """)
     
     spark.sql(f"""
-            insert into {catalog_name}.{schema_name}control_table
+            insert into {catalog_name}.{schema_name}.control_table
             (
             src_layer, 
             tgt_layer, 
@@ -481,7 +481,7 @@ else:
             """)
     
     #Updating Job logs
-    spark.sql(f"""insert into {catalog_name}.{schema_name}job_logs
+    spark.sql(f"""insert into {catalog_name}.{schema_name}.job_logs
               (job_id , job_name, run_id , table_name, rows_read, rows_written, job_datetime ,no_of_retries ,trigger_type ,trigger_datetime) 
               values 
               ('{job_id}', '{job_name}', '{run_id}' , '{tn}', '{init_cnt}' , '{final_cnt}', '{job_datetime}' , '{no_of_retries}' ,'{trigger_type}' ,'{trigger_datetime}');""")
@@ -489,4 +489,4 @@ else:
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select * from {catalog_name}.{schema_name}fact_returns;
+# MAGIC -- select * from {catalog_name}.{schema_name}fact_returns;
