@@ -151,6 +151,7 @@
 # MAGIC )
 # MAGIC using delta;
 # MAGIC
+# MAGIC insert into retailco.retailco_schema.dim_payment_mts(payment_method) values ( 'Credit Card'),
 # MAGIC insert into retailco_dev_catalog.retailco_dev_schema.dim_payment_mts(payment_method) values ( 'Credit Card'),
 # MAGIC ('Wallet'),
 # MAGIC ('Debit Card'),
@@ -173,6 +174,7 @@
 # MAGIC )
 # MAGIC using delta;
 # MAGIC
+# MAGIC insert into retailco.retailco_schema.dim_status(status) values 
 # MAGIC insert into retailco_dev_catalog.retailco_dev_schema.dim_status(status) values 
 # MAGIC ("Delivered"),
 # MAGIC ("Shipped"),
@@ -194,6 +196,7 @@
 # MAGIC )
 # MAGIC using delta;
 # MAGIC
+# MAGIC insert into retailco.retailco_schema.dim_return_events(event_type) values ('payment_initiated'), 
 # MAGIC insert into retailco_dev_catalog.retailco_dev_schema.dim_return_events(event_type) values ('payment_initiated'), 
 # MAGIC ('page_view'), 
 # MAGIC ('order_cancelled'),
