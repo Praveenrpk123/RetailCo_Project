@@ -41,12 +41,11 @@ top_5_selling_prods.\
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC
-# MAGIC select category, count(product_id) as total_products from {catalog_name}.{schema_name}.dim_products 
-# MAGIC where is_active = true
-# MAGIC group by category
-# MAGIC order by count(product_id) desc;
+spark.sql(f"""
+select category, count(product_id) as total_products from {catalog_name}.{schema_name}.dim_products 
+where is_active = true
+group by category
+order by count(product_id) desc;""")
 
 # COMMAND ----------
 
@@ -55,9 +54,8 @@ top_5_selling_prods.\
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC
-# MAGIC select supplier_id, count(product_id) as total_products from {catalog_name}.{schema_name}.dim_products 
-# MAGIC where is_active = true
-# MAGIC group by supplier_id
-# MAGIC order by count(product_id) desc;
+spark.sql(f"""
+select supplier_id, count(product_id) as total_products from {catalog_name}.{schema_name}.dim_products 
+where is_active = true
+group by supplier_id
+order by count(product_id) desc;""")
