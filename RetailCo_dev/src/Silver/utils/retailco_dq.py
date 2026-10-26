@@ -17,7 +17,7 @@ class retailco_dq():
         self.total_checks += 1
         if final_cnt == 0:
             self.perc = 100
-            if spark.catalog.tableExists(f"{catalog_name}.{schema_name}.data_quality_logs"):
+            if self.spark.catalog.tableExists(f"{catalog_name}.{schema_name}.data_quality_logs"):
                 self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                     job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                     values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
@@ -41,7 +41,7 @@ class retailco_dq():
                         '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
             self.prac = (1 - (final_cnt/older_count))*100
-            if spark.catalog.tableExists(f"{catalog_name}.{schema_name}.data_quality_logs"):
+            if self.spark.catalog.tableExists(f"{catalog_name}.{schema_name}.data_quality_logs"):
                 self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                     job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                     values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
