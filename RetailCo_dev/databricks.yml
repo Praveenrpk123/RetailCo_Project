@@ -45,12 +45,13 @@ targets:
   prod:
     mode: production
     workspace:
-      host: http://127.0.0.1:7073
-      # We explicitly deploy to /Workspace/Users/mallikaravipp11@gmail.com to make sure we only have a single copy.
-      root_path: /Workspace/Users/mallikaravipp11@gmail.com/.bundle/${bundle.name}/${bundle.target}
+      profile: prod
+      host: https://dbc-d2056ae6-b88e.cloud.databricks.com/
+      # We explicitly deploy to /Workspace/Users/shielcyber149@gmail.com to make sure we only have a single copy.
+      root_path: /Workspace/Users/shielcyber149@gmail.com/.bundle/${bundle.name}/${bundle.target}
     variables:
       catalog_name: retailCo_prod_catalog
       schema_name: retailCo_prod_Schema
-    permissions:
-      - user_name: mallikaravipp11@gmail.com
-        level: CAN_MANAGE
+    # Permissions removed — deploying as shielcyber149@gmail.com who owns the workspace.
+    # To grant access to other users, add a permissions section and use a token with
+    # the access-management scope.
