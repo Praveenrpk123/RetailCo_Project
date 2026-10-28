@@ -64,7 +64,7 @@ else:
 
 # COMMAND ----------
 
-path = '/Volumes/{catalog_name}/{schema_name}/bronze/store_events/'
+path = f'/Volumes/{catalog_name}/{schema_name}/bronze/store_events/'
 
 ##Data should be greater than last batch run - Incremental loading
 df_store_events = spark.read.format('delta').load(path).filter(col('ingested_timestamp') > lit(max_timestamp))
@@ -177,7 +177,7 @@ with open(path, 'r') as f:
             print(msg)
 
         #sequence check
-        if i["check"] == 'Sequence_ck'and i["check_list"] != None  and i["enabled"]  == True:
+        if i["check"] == 'sequence_ck'and i["check_list"] != None  and i["enabled"]  == True:
             old_cnt = df.count()
             if type(i["check_list"]) == list:
                 df, msg = rc_dq.sequence_check(job_id = job_id, run_id = run_id, table_name = tn, 

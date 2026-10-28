@@ -54,7 +54,7 @@ schema_name = dbutils.widgets.get("schema_name")
 # COMMAND ----------
 
 # src_path and getting the config files
-src_loc = "/Volumes/{catalog_name}/{schema_name}/raw_data/"
+src_loc = f"/Volumes/{catalog_name}/{schema_name}/raw_data/"
 path = os.path.abspath('../config_files/raw_configs/configs.json')
 # print(path)
 

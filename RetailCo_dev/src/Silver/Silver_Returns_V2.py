@@ -71,7 +71,7 @@ display(max_timestamp)
 
 # COMMAND ----------
 
-path = '/Volumes/{catalog_name}/{schema_name}/bronze/returns/'
+path = f'/Volumes/{catalog_name}/{schema_name}/bronze/returns/'
 
 #Data should be greater than last batch run - Incremental loading
 df_returns = spark.read.format('delta').load(path).filter(col('ingested_timestamp') > lit(max_timestamp))
@@ -167,7 +167,7 @@ with open(path, 'r') as f:
                 value_to_ck = i["value_to_ck"], catalog_name = catalog_name, schema_name = schema_name)
             print(msg)
 #sequence_check
-# if check == 'Sequence_ck'and check_list != None:
+# if check == 'sequence_ck'and check_list != None:
 #     if type(check_list) == list:
 #         df = df.withColumn(f'{col_name}', 
 #                 when(col(f'{col_name}').\
