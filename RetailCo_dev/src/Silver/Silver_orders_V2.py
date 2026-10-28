@@ -76,7 +76,7 @@ display(max_timestamp)
 
 # COMMAND ----------
 
-path = '/Volumes/{catalog_name}/{schema_name}/bronze/orders/'
+path = f'/Volumes/{catalog_name}/{schema_name}/bronze/orders/'
 
 #Data should be greater than last batch run - Incremental loading
 df_orders = spark.read.format('delta').load(path).filter(col('ingested_timestamp') > lit(max_timestamp))

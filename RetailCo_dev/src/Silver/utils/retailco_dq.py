@@ -252,7 +252,7 @@ class retailco_dq():
         msg = f"No of records dropped due to {check} check for {col_name} is {final_cnt}"
         return df, msg
     
-    def gt_date_check(self, job_id, run_id, table_name, chec k, df, col_name, date_val, catalog_name, schema_name):
+    def gt_date_check(self, job_id, run_id, table_name, check, df, col_name, date_val, catalog_name, schema_name):
         from pyspark.sql.functions import count, col, filter, lit
         older_count = df.count()
         df = df.filter(col(f'{col_name}') > lit(date_val))
@@ -343,7 +343,7 @@ class retailco_dq():
     def sequence_check(self, job_id, run_id, table_name, check, df, col_name, check_list, catalog_name, schema_name):
         from pyspark.sql.functions import count, filter, col, lit
         older_count = df.count()
-        df = df.filter((col(f'{col_name}').isin(f'{check_list}')))
+        df = df.filter(~(col(f'{col_name}').isin(f'{check_list}')))
         new_count = df.count()
         final_cnt = older_count - new_count
         self.total_checks += 1

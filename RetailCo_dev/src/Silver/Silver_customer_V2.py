@@ -95,7 +95,7 @@ print(max_timestamp)
 
 # COMMAND ----------
 
-path = '/Volumes/{catalog_name}/{schema_name}/bronze/customers/'
+path = f'/Volumes/{catalog_name}/{schema_name}/bronze/customers/'
 
 ##Data should be greater than last batch run - Incremental loading
 
