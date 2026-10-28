@@ -1,5 +1,3 @@
-# RetailCo_Project
-Retail Co Ecommerce End to End Data Engineering Project
 # RetailCo Project
 
 **An end-to-end data engineering project for a fictional e-commerce retailer, built on Databricks with a Bronze → Silver → Gold (medallion) architecture, config-driven data quality checks, incremental loading, and automated run logging.**
@@ -20,6 +18,7 @@ Retail Co Ecommerce End to End Data Engineering Project
 - [Data Quality Framework](#data-quality-framework)
 - [Incremental Loading and Logging](#incremental-loading-and-logging)
 - [Orchestration](#orchestration)
+- [CI/CD with Databricks Asset Bundles](#cicd-with-databricks-asset-bundles)
 - [Gold KPIs](#gold-kpis)
 - [Repository Structure](#repository-structure)
 - [Getting Started](#getting-started)
@@ -188,6 +187,39 @@ Bronze_ingestion
 ```
 
 Job metadata (run ID, job ID, trigger type and time, retry count) is passed to every task as parameters, so all log tables can be joined on `run_id`.
+
+---
+
+## CI/CD with Databricks Asset Bundles
+
+The whole project (jobs, parameters, triggers, environments) is defined as code in a Databricks Asset Bundle, so the same definition is deployed to every environment with one command and nothing is configured by hand in the workspace UI.
+
+**Environments** are defined as targets in [`databricks.yml`](RetailCo_dev/databricks.yml):
+
+| Target | Mode          | Behaviour                                                                                                   |
+|--------|---------------|-------------------------------------------------------------------------------------------------------------|
+| `dev`  | `development` | Default target. Resources are prefixed with `[dev <user>]`, and job schedules and triggers are paused by default. |
+| `prod` | `production`  | Deploys to a fixed workspace root path so only a single copy exists, with explicit owner permissions (`CAN_MANAGE`). |
+
+**Per-environment configuration** comes from bundle variables, so the notebooks contain no environment-specific values:
+
+| Variable       | `dev`                  | `prod`                  |
+|----------------|------------------------|-------------------------|
+| `catalog_name` | `retailco_dev_catalog` | `retailCo_prod_catalog` |
+| `schema_name`  | `retailCo_dev_schema`  | `retailCo_prod_Schema`  |
+
+These are passed to every task as job parameters (`catalog_name`, `schema_name`), together with run metadata such as `Run_id`, `Job_id` and `Trigger_type`.
+
+**Deployment workflow**
+
+```bash
+databricks bundle validate                  # check the bundle definition
+databricks bundle deploy --target dev       # deploy to dev and test
+databricks bundle run DAB_retailco_pipeline_v2 --target dev
+databricks bundle deploy --target prod      # promote the same code to prod
+```
+
+The same commands can be run from any CI system (for example a GitHub Actions workflow that runs `validate` on pull requests and `deploy --target prod` on merge to `main`) by authenticating the Databricks CLI with a service principal.
 
 ---
 
