@@ -31,8 +31,8 @@ dbutils.widgets.text('Job_datetime', 'None')
 dbutils.widgets.text('Trigger_type', 'None')
 dbutils.widgets.text('Trigger_datetime', 'None')
 # Declare the widget (required, even when running as a job) -- coming from DAB
-dbutils.widgets.text("catalog_name","RetailCo_Dev_Catalog")
-dbutils.widgets.text("schema_name", "RetailCo_Dev_schema")
+dbutils.widgets.text("catalog_name","")
+dbutils.widgets.text("schema_name", "")
 
 job_id = dbutils.widgets.get('Job_id')
 job_datetime = dbutils.widgets.get('Job_datetime')
@@ -71,7 +71,7 @@ display(max_timestamp)
 
 # COMMAND ----------
 
-path = '/Volumes/retailco/retailco_schema/bronze/returns/'
+path = '/Volumes/{catalog_name}/{schema_name}/bronze/returns/'
 
 #Data should be greater than last batch run - Incremental loading
 df_returns = spark.read.format('delta').load(path).filter(col('ingested_timestamp') > lit(max_timestamp))
@@ -81,7 +81,7 @@ df_returns = spark.read.format('delta').load(path).filter(col('ingested_timestam
 if df_returns.count() == 0:
     init_cnt = 0
     final_cnt = 0
-    spark.sql(f"""insert into {catalog_name}.{schema_name}job_logs
+    spark.sql(f"""insert into {catalog_name}.{schema_name}.job_logs
               (job_id , job_name, run_id, table_name, rows_read, rows_written, job_datetime ,no_of_retries ,trigger_type ,trigger_datetime) 
               values 
               ('{job_id}', '{job_name}', '{run_id}', '{tn}' ,'{init_cnt}' , '{final_cnt}', '{job_datetime}' , '{no_of_retries}' ,'{trigger_type}' ,'{trigger_datetime}');""")

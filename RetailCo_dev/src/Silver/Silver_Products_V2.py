@@ -29,8 +29,8 @@ dbutils.widgets.text('Job_datetime', 'None')
 dbutils.widgets.text('Trigger_type', 'None')
 dbutils.widgets.text('Trigger_datetime', 'None')
 #Defining widgets from DAB
-dbutils.widgets.text("catalog_name","RetailCo_Dev_Catalog")
-dbutils.widgets.text("schema_name", "RetailCo_Dev_schema")
+dbutils.widgets.text("catalog_name", "")
+dbutils.widgets.text("schema_name", "")
 
 job_id = dbutils.widgets.get('Job_id')
 job_datetime = dbutils.widgets.get('Job_datetime')
@@ -69,7 +69,7 @@ else:
 
 # COMMAND ----------
 
-path = '/Volumes/retailco/retailco_schema/bronze/products/'
+path = f'/Volumes/{catalog_name}/{schema_name}/bronze/products/'
 #Data should be greater than last batch run - Incremental loading
 df = spark.read.format('delta').load(path).filter(col('ingested_timestamp') > lit(max_timestamp))
 
