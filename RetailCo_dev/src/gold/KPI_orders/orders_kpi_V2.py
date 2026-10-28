@@ -1,7 +1,7 @@
 # Databricks notebook source
 # Declare the widget (required, even when running as a job) -- coming from DAB
-dbutils.widgets.text("catalog_name","RetailCo_Dev_Catalog")
-dbutils.widgets.text("schema_name", "RetailCo_Dev_schema")
+dbutils.widgets.text("catalog_name","")
+dbutils.widgets.text("schema_name", "")
 
 # Retrieve the value
 catalog_name = dbutils.widgets.get("catalog_name")

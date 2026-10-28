@@ -28,8 +28,8 @@ dbutils.widgets.text('Trigger_type', '')
 dbutils.widgets.text('Trigger_datetime', '')
 
 # Declare the widget (required, even when running as a job) -- coming from DAB
-dbutils.widgets.text("catalog_name","RetailCo_Dev_Catalog")
-dbutils.widgets.text("schema_name", "RetailCo_Dev_schema")
+dbutils.widgets.text("catalog_name","")
+dbutils.widgets.text("schema_name", "")
 # # print(dbutils.jobs.taskValues)
 
 # COMMAND ----------
@@ -53,9 +53,6 @@ schema_name = dbutils.widgets.get("schema_name")
 
 # COMMAND ----------
 
-#Providing catalog_name based on environments
-catalog_name = ''
-schema_name = ''
 # src_path and getting the config files
 src_loc = "/Volumes/{catalog_name}/{schema_name}/raw_data/"
 path = os.path.abspath('../config_files/raw_configs/configs.json')

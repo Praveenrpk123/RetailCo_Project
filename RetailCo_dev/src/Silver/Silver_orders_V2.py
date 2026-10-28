@@ -35,8 +35,8 @@ dbutils.widgets.text('Job_datetime', 'None')
 dbutils.widgets.text('Trigger_type', 'None')
 dbutils.widgets.text('Trigger_datetime', 'None')
 # Declare the widget (required, even when running as a job) -- coming from DAB
-dbutils.widgets.text("catalog_name","RetailCo_Dev_Catalog")
-dbutils.widgets.text("schema_name", "RetailCo_Dev_schema")
+dbutils.widgets.text("catalog_name","")
+dbutils.widgets.text("schema_name", "")
 
 job_id = dbutils.widgets.get('Job_id')
 job_datetime = dbutils.widgets.get('Job_datetime')
@@ -76,7 +76,7 @@ display(max_timestamp)
 
 # COMMAND ----------
 
-path = '/Volumes/retailco/retailco_schema/bronze/orders/'
+path = '/Volumes/{catalog_name}/{schema_name}/bronze/orders/'
 
 #Data should be greater than last batch run - Incremental loading
 df_orders = spark.read.format('delta').load(path).filter(col('ingested_timestamp') > lit(max_timestamp))
@@ -244,7 +244,7 @@ with open(path, 'r') as f:
                 print(msg)
 
         #sequence presence
-        if i["check"] == 'Sequence_ck'and i["check_list"] != None and i['enabled'] == True:
+        if i["check"] == 'sequence_ck'and i["check_list"] != None and i['enabled'] == True:
             if type(i["check_list"]) == list:
                 df, msg = rc_dq.sequence_check(job_id = job_id, run_id = run_id, table_name = tn, 
                 check = i["check"], df =df, col_name = i["col_name"], 
@@ -329,7 +329,7 @@ df_final =  df_prod_join.select(
     'record_hash'
 )
 
-display(df_prod_join.count())
+# display(df_prod_join.count())
 
 # COMMAND ----------
 
