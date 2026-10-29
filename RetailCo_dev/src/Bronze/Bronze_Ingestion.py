@@ -152,4 +152,4 @@ with open(path) as f:
         timetaken = time.time() - start_time
 
         #Inserting the metadata into the job_log table
-        spark.sql(f"""insert into retailco.retailco_schema.job_logs(job_id , job_name, run_id , table_name,  timetaken, job_datetime ,no_of_retries ,trigger_type ,trigger_datetime) values ('{job_id}', '{job_name}', '{run_id}' ,'{filename}', '{timetaken}', '{job_datetime}' , '{no_of_retries}' ,'{trigger_type}' ,'{trigger_datetime}');""")
+        spark.sql(f"""insert into {catalog_name}.{schema_name}.job_logs(job_id , job_name, run_id , table_name,  timetaken, job_datetime ,no_of_retries ,trigger_type ,trigger_datetime) values ('{job_id}', '{job_name}', '{run_id}' ,'{filename}', '{timetaken}', '{job_datetime}' , '{no_of_retries}' ,'{trigger_type}' ,'{trigger_datetime}');""")
