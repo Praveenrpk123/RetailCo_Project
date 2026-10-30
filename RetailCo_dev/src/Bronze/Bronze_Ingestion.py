@@ -106,7 +106,7 @@ with open(path) as f:
                 # .\                withColumn('record_hash', sha2(concat_ws("||",*df.columns),256))
             
             #writing data into the bronze layer
-            df.writeStream.\
+            query = df.writeStream.\
                 format('delta').\
                 outputMode('append').\
                 option('mergeSchema', 'true').\
@@ -139,7 +139,7 @@ with open(path) as f:
                 withColumn('record_hash', sha2(concat_ws("||",*df.columns),256))
 
             #writing data into the bronze layer
-            df.writeStream.\
+            query = df.writeStream.\
                 format('delta').\
                 outputMode('append').\
                 option('mergeSchema', 'true').\
@@ -147,7 +147,12 @@ with open(path) as f:
                 option('path',f"/Volumes/{catalog_name}/{schema_name}/bronze/{filename}/").\
                 trigger(availableNow = True).\
                 start()
+        
 
+        #RC-104 - 1. Adding await Termination to the query to calculate the exact time of run.
+        # awaitTermination() is a PySpark method used to block the current thread until a streaming query stops or fails.
+        query.awaitTermination()
+        
         #total_time_taken
         timetaken = time.time() - start_time
 
