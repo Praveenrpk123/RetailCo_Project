@@ -32,3 +32,6 @@ packages = ["RetailCo_Project/RetailCo_dev"]
 
 [tool.ruff]
 line-length = 120
+
+[tool.databricks.environment]
+environment_version = '6'

@@ -220,10 +220,6 @@ df = df.\
 
 # COMMAND ----------
 
-display(df)
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC ##DATA QUALITY CHECKS
 
@@ -380,7 +376,8 @@ df_final.createOrReplaceTempView('cust_temp_view')
 # If target table exists
 if spark.catalog.tableExists(f'{catalog_name}.{schema_name}.dim_customers'):
     #Getting target.
-    target = DeltaTable.forName(spark, f'{catalog_name}.{schema_name}.dim_customers')
+    table_name = f'{catalog_name}.{schema_name}.dim_customers'
+    target = DeltaTable.forName(spark, table_name)
     target_df = target.toDF()
     #if target table count is greater than zero
     if target_df.count() > 0:
@@ -465,7 +462,7 @@ if spark.catalog.tableExists(f'{catalog_name}.{schema_name}.dim_customers'):
                     src.region,
                     src.segment,
                     src.record_hash,
-                    True,
+                    src.is_active,
                     src.effective_from,
                     src.effective_to,
                     src.ingested_timestamp
@@ -515,7 +512,7 @@ if spark.catalog.tableExists(f'{catalog_name}.{schema_name}.dim_customers'):
               region,
               segment,
               record_hash,
-              True,
+              is_active,
               effective_from,
               effective_to,
               ingested_timestamp from cust_temp_view""")
@@ -584,7 +581,7 @@ else:
               region,
               segment,
               record_hash,
-              True,
+              is_active,
               effective_from,
               effective_to,
               ingested_timestamp from cust_temp_view""")
