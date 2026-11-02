@@ -215,7 +215,7 @@ df_eff_from =  df_dq.\
 df_eff_to = df_eff_from.\
     withColumn('rn', row_number().over(window_val)).\
     withColumn('lag_val', lag(col('effective_from')).over(window_val)).\
-    withColumn('effective_to', when(col('lag_val').isNull(), lit((date(9999,1,1)))).\
+    withColumn('effective_to', when(col('lag_val').isNull(), lit((date(9999,12,31)))).\
         otherwise(date_add(col('lag_val'), -1))).\
     withColumn('is_active', when(col('rn') == 1, True).otherwise(False)).\
     withColumnRenamed('Ingested_timestamp', 'ingested_timestamp').\
@@ -252,7 +252,8 @@ max_dt =  max_ts.collect()[0]['max_dt']
 #If target table exists
 if spark.catalog.tableExists(f'{catalog_name}.{schema_name}.dim_products'):
   #target
-    target = DeltaTable.forName(spark, f'{catalog_name}.{schema_name}.dim_products')
+    table_name = f'{catalog_name}.{schema_name}.dim_products'
+    target = DeltaTable.forName(spark, table_name)
     target_df =target.toDF()
     # print(target_df.count())
 
@@ -343,7 +344,7 @@ if spark.catalog.tableExists(f'{catalog_name}.{schema_name}.dim_products'):
                   source.stock_qty , 
                   source.supplier_id , 
                   source.record_hash ,
-                  True , 
+                  source.is_active , 
                   source.effective_from , 
                   source.effective_to ,
                   source.ingested_timestamp
@@ -396,7 +397,7 @@ if spark.catalog.tableExists(f'{catalog_name}.{schema_name}.dim_products'):
               stock_qty , 
               supplier_id , 
               record_hash ,
-              True , 
+              is_active , 
               effective_from , 
               effective_to ,
               ingested_timestamp 
@@ -487,7 +488,7 @@ else:
               selling_price , 
               stock_qty , 
               supplier_id , 
-              True , 
+              is_active , 
               effective_from , 
               effective_to ,
               ingested_timestamp 
