@@ -1,22 +1,19 @@
 # .github/workflows/ci.yml
 name: CI — Validate Bundle
-
+concurrency: 1
 on:
   push:
-    branches: main
+    branches: 
+      - main
     paths:
-      - "RetailCo_dev/**"
-
-permissions:
-  contents: read
-  id-token: write
+      - 'RetailCo_dev/**'
 
 jobs:
-  validate:
-    name: Validate DAB Bundle
+  deploy:
+    name: 'Deploy DAB Bundle'
     runs-on: ubuntu-latest
     defaults:
-      run:
+     run:
         working-directory: RetailCo_dev
     # env:
     #   DATABRICKS_AUTH_TYPE: github-oidc
@@ -29,12 +26,15 @@ jobs:
 
       - name: Validate bundle
         run: databricks bundle validate --target dev
+        working-directory: RetailCo_dev
         
       - name: bundle summary
         run: databricks bundle summary --target dev
+        working-directory: RetailCo_dev
 
       - name: Show diff (plan)
         run: databricks bundle plan --target dev
 
       - name: deploy bundle
         run: databricks bundle deploy --target dev
+        working-directory: RetailCo_dev
