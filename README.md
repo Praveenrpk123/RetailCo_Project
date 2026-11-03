@@ -97,7 +97,7 @@ Raw files land in a Unity Catalog volume under `raw_data/<entity>/`. The entitie
 - Loops over the ingestion config and reads each entity with **Auto Loader** (`cloudFiles`), writing append-only Delta with `availableNow` triggers.
 - Uses schema inference and `addNewColumns` schema evolution; `products` uses explicit schema hints because of its multi-line JSON.
 - Adds audit columns to every record: `Ingested_timestamp`, `file_name`, `folder_path`, `Job_Id`, `Run_id`, plus a SHA-256 `record_hash`.
-- There is no hardcoded values for catalog and schema name.
+- There is no hardcoded values for catalog and schema name.REmoved all hardcoded.
 - Writes per-table ingestion timings to `job_logs`.
 
 ### Silver: cleaned, conformed model
