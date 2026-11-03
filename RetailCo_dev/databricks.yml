@@ -26,7 +26,6 @@ variables:
   schema_name:
     description: schema name for my retailCo DAB
     default: RetailCo_Dev_schema
-
 targets:
   dev:
     # The default target uses 'mode: development' to create a development copy.
