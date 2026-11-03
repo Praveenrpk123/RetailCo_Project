@@ -24,6 +24,9 @@ jobs:
 
       - uses: databricks/setup-cli@main
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
       - name: Validate bundle
         run: databricks bundle validate --target dev
         working-directory: RetailCo_dev
