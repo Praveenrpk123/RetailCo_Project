@@ -38,13 +38,6 @@ jobs:
           DATABRICKS_TOKEN: ${{secrets.dev_token}}
           DATABRICKS_BUNDLE_ENV: dev
 
-      - name: Show diff (plan)
-        run: databricks bundle plan --target dev
-        working-directory: RetailCo_dev
-        env:
-          DATABRICKS_TOKEN: ${{secrets.dev_token}}
-          DATABRICKS_BUNDLE_ENV: dev
-
       - name: deploy bundle
         run: databricks bundle deploy --target dev
         working-directory: RetailCo_dev
