@@ -52,7 +52,7 @@ with this project. It's also possible to interact with it directly using the CLI
 
 3. Similarly, to deploy a production copy, type:
    ```
-   <!-- $ databricks bundle validate --target prod -->
+   $ databricks bundle validate --target prod
    <!-- $ databricks bundle summary --target prod -->
    $ databricks bundle deploy --target prod
    ```
