@@ -17,10 +17,10 @@ jobs:
     defaults:
      run:
         working-directory: RetailCo_dev
-    # env:
-    #   DATABRICKS_AUTH_TYPE: github-oidc
-    #   DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
-    #   DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+    env:
+      # DATABRICKS_AUTH_TYPE: github-oidc
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
