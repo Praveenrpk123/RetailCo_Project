@@ -64,7 +64,7 @@ max_timestamp = ''
 
 ts_val = spark.sql(f"""select coalesce(max_timestamp,timestamp('9999-12-31')) as max_dt from {catalog_name}.{schema_name}.control_table where src_layer = '{src}' and tgt_layer = '{tgt}' and table_name = '{tn}';""")
 
-print(len(ts_val.collect()))
+# print(len(ts_val.collect()))
 #ts.collect() will return a list. if len of list is not equal to zero, gets from control table else default value
 
 if len(ts_val.collect()) != 0:
