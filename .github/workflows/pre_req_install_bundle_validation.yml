@@ -3,11 +3,9 @@ name: Bundle Validation
 concurrency: 1
 on:
   pull_request:
-    types: [opened, synchronize, closed]
+    types: [opened]
     branches:
       - main
-    paths:
-      - 'RetailCo_dev/**'
 
 jobs:
   deploy:
