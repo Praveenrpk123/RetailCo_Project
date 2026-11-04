@@ -39,7 +39,7 @@ jobs:
       #   run: uv run ruff format .
         # Checks code formatting without actually reformatting.
       - name: format check
-        run: uv run ruff format --check
+        run: uv run ruff format --check .
       
       - name: Validate bundle
         run: databricks bundle validate --target dev
