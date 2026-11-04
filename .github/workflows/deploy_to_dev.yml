@@ -1,5 +1,5 @@
 # .github/workflows/ci.yml
-name: Bundle deploy
+name: Bundle deploy dev
 concurrency: 1
 on:
   push:
