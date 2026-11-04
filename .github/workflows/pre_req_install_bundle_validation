@@ -1,0 +1,43 @@
+# .github/workflows/ci.yml
+name: Bundle Validation
+concurrency: 1
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+    branches:
+      - main
+    paths:
+      - 'RetailCo_dev/**'
+
+jobs:
+  deploy:
+    name: 'Pre-req installation and Bundle validation in dev'
+    runs-on: ubuntu-latest
+    defaults:
+     run:
+        working-directory: RetailCo_dev
+    # env:
+    #   DATABRICKS_AUTH_TYPE: github-oidc
+    #   DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+    #   DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: databricks/setup-cli@main
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Validate bundle
+        run: databricks bundle validate --target dev
+        working-directory: RetailCo_dev
+        env:
+          DATABRICKS_TOKEN: ${{secrets.dev_token}}
+          DATABRICKS_BUNDLE_ENV: dev
+        
+      - name: bundle summary
+        run: databricks bundle summary --target dev
+        working-directory: RetailCo_dev
+        env:
+          DATABRICKS_TOKEN: ${{secrets.dev_token}}
+          DATABRICKS_BUNDLE_ENV: dev
