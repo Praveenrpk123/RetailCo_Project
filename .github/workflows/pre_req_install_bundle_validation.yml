@@ -30,10 +30,10 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
         # Lint all files in the current directory
-        run: uv run ruff check .
+        run: uv run ruff check
 
         # Checks code formatting without actually reformatting.
-        run: uv run ruff format --check .
+        run: uv run ruff format --check
       
       - name: Validate bundle
         run: databricks bundle validate --target dev
