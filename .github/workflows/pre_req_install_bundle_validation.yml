@@ -27,12 +27,15 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
         # Installs all project dependencies into the virtual environment
+      - name: uv sync
         run: uv sync --locked --all-extras --dev
 
         # Lint all files in the current directory
+      - name: ruff check
         run: uv run ruff check
 
         # Checks code formatting without actually reformatting.
+      - name: format check
         run: uv run ruff format --check
       
       - name: Validate bundle
