@@ -1,6 +1,8 @@
 # .github/workflows/ci.yml
 name: Bundle deploy dev
-concurrency: 1
+concurrency: 
+  group: deploy-dev
+  cancel-in-progress: false
 on:
   push:
     branches: 
