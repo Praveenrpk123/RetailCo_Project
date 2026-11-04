@@ -33,7 +33,10 @@ jobs:
         # Lint all files in the current directory
       # - name: ruff check
       #   run: uv run ruff check
-
+      
+         # format the files
+      - name: ruff format
+        run: uv run ruff format
         # Checks code formatting without actually reformatting.
       - name: format check
         run: uv run ruff format --check
