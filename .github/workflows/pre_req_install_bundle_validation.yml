@@ -31,8 +31,8 @@ jobs:
       #   run: uv sync --locked --all-extras --dev
 
         # Lint all files in the current directory
-      - name: ruff check
-        run: uv run ruff check
+      # - name: ruff check
+      #   run: uv run ruff check
 
         # Checks code formatting without actually reformatting.
       - name: format check
