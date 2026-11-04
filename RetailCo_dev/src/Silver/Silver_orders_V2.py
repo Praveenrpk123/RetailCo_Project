@@ -168,11 +168,6 @@ df = df_hash.withColumn("rn",
                    row_number().over(window_val)).filter(col('rn') == 1).\
                    drop(col('rn'), col('row_hash'))
 # display(df.filter(col('order_id') == 'ORD0211599'))                   
-                #    
-# display(df.limit(10))
-# print(df.count())
-# display(df.filter(col('up_flag') == True).count())
-# display(df.filter(col('up_flag') == False).count())
 # df.createOrReplaceTempView('fact_ord')
 
 # COMMAND ----------
