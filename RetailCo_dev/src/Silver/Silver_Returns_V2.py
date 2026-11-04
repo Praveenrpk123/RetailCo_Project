@@ -60,7 +60,7 @@ max_timestamp = ''
 
 ts_val = spark.sql(f"""select coalesce(max_timestamp,timestamp('9999-12-31')) as max_dt from {catalog_name}.{schema_name}.control_table where src_layer = '{src}' and tgt_layer = '{tgt}' and table_name = '{tn}';""")
 
-print(len(ts_val.collect()))
+# print(len(ts_val.collect()))
 #ts.collect() will return a list. if len of list is not equal to zero, gets from control table else default value
 
 if len(ts_val.collect()) != 0:
@@ -174,8 +174,8 @@ with open(path, 'r') as f:
 #                             isin(f'{check_list}'), col('{col_name}')).\
 #                 otherwise(lit('Unknown')))
 df_dq = df
-display(df_dq.limit(1))
-print(df_dq.count())
+# display(df_dq.limit(1))
+# print(df_dq.count())
 
 # COMMAND ----------
 
@@ -238,7 +238,7 @@ df_final = df_orders_stg.\
            'ingested_timestamp'
            )
 final_cnt = df_final.count()
-display(df_final.limit(1))
+# display(df_final.limit(1))
 
 # COMMAND ----------
 
