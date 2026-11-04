@@ -1,6 +1,6 @@
 # Databricks notebook source
 # Declare the widget (required, even when running as a job) -- coming from DAB
-dbutils.widgets.text("catalog_name","")
+dbutils.widgets.text("catalog_name", "")
 dbutils.widgets.text("schema_name", "")
 
 # Retrieve the value
@@ -25,10 +25,9 @@ df_net_gross_rev_monthly = spark.sql(f"""select trunc(order_date, 'MM') as order
     group by trunc(order_date, 'MM')
     order by trunc(order_date, 'MM');""")
 
-df_net_gross_rev_monthly.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.Monthly_Net_and_gross_revenue")
+df_net_gross_rev_monthly.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.Monthly_Net_and_gross_revenue"
+)
 
 # COMMAND ----------
 
@@ -46,10 +45,9 @@ shipped_orders_in_last_10_days = spark.sql(f"""
     group by order_date
     order by order_date desc;""")
 
-shipped_orders_in_last_10_days.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.orders_shipped_10_days_dayWise")
+shipped_orders_in_last_10_days.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.orders_shipped_10_days_dayWise"
+)
 
 # COMMAND ----------
 
@@ -67,10 +65,9 @@ orders_delivered_10_days_dayWise = spark.sql(f"""
     group by order_date
     order by order_date desc;""")
 
-orders_delivered_10_days_dayWise.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.orders_delivered_10_days_dayWise")
+orders_delivered_10_days_dayWise.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.orders_delivered_10_days_dayWise"
+)
 
 # COMMAND ----------
 
@@ -94,10 +91,9 @@ top_5_customers_with_orders = spark.sql(f"""with total_orders_per_customer_cte a
         order by total_orders desc;""")
 
 
-top_5_customers_with_orders.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.top_5_customers_with_orders")
+top_5_customers_with_orders.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.top_5_customers_with_orders"
+)
 
 # COMMAND ----------
 
@@ -119,10 +115,9 @@ top_5_products_with_high_orders = spark.sql(f"""with total_orders_per_prod_cte a
         where rnk <= 5;""")
 
 
-top_5_products_with_high_orders.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.top_5_products_with_high_orders")
+top_5_products_with_high_orders.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.top_5_products_with_high_orders"
+)
 
 # COMMAND ----------
 
@@ -145,10 +140,9 @@ top_5_products_with_high_quantity_sold = spark.sql(f"""with total_orders_per_pro
         where rnk <= 5;""")
 
 # display(top_5_products_with_high_quantity_sold)
-top_5_products_with_high_quantity_sold.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.top_5_products_with_high_quantity_sold")
+top_5_products_with_high_quantity_sold.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.top_5_products_with_high_quantity_sold"
+)
 
 # COMMAND ----------
 
@@ -170,10 +164,9 @@ top_5_products_with_high_revenue = spark.sql(f"""with highest_revenue_prods as (
         on hp.product_sk = dp.product_sk
         where rnk <= 5;""")
 
-top_5_products_with_high_revenue.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.top_5_products_with_high_revenue")
+top_5_products_with_high_revenue.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.top_5_products_with_high_revenue"
+)
 
 # COMMAND ----------
 
@@ -182,7 +175,7 @@ top_5_products_with_high_revenue.\
 
 # COMMAND ----------
 
-order_kpi_rate =  spark.sql(f"""with val_cte as (select 
+order_kpi_rate = spark.sql(f"""with val_cte as (select 
         sum(quantity) as total_qty_sold,
         count(*) as total_orders, 
         sum(case when status in ('Shipped', 'Delivered') then 1 else 0 end) as successful_orders,
@@ -197,7 +190,4 @@ order_kpi_rate =  spark.sql(f"""with val_cte as (select
         avg_delivery_days
         from val_cte;""")
 
-order_kpi_rate.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.orders_kpi")
+order_kpi_rate.write.mode("overwrite").saveAsTable(f"{catalog_name}.{schema_name}.orders_kpi")
