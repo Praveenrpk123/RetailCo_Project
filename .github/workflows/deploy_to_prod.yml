@@ -1,6 +1,8 @@
 # .github/workflows/ci.yml
-name: Bundle deploy
-concurrency: 1
+name: Bundle deploy Prod
+concurrency: 
+  group: deploy-prod
+  cancel-in-progress: false
 on:
   workflow_run:
     workflows: ['Bundle deploy dev']   # ← must match the `name:` in dev yml exactly
