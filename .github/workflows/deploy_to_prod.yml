@@ -23,6 +23,7 @@ jobs:
       # DATABRICKS_AUTH_TYPE: github-oidc
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      DATABRICKS_BUNDLE_ENV: prod
     steps:
       - uses: actions/checkout@v4
 
@@ -35,25 +36,13 @@ jobs:
       - name: validating bundle
         run: databricks bundle validate --target prod
         working-directory: RetailCo_dev
-        env:
-          DATABRICKS_HOST: ${{secrets.prod_host}}
-          DATABRICKS_TOKEN: ${{secrets.prod_token}}
-          DATABRICKS_BUNDLE_ENV: prod
 
       - run: echo "summarize the bundle to production..."
       - name: summarize bundle
         run: databricks bundle summary --target prod
         working-directory: RetailCo_dev
-        env:
-          DATABRICKS_HOST: ${{secrets.prod_host}}
-          DATABRICKS_TOKEN: ${{secrets.prod_token}}
-          DATABRICKS_BUNDLE_ENV: prod
       
       - run: echo "Deploying to production..."
       - name: deploy bundle
         run: databricks bundle deploy --target prod
         working-directory: RetailCo_dev
-        env:
-          DATABRICKS_HOST: ${{secrets.prod_host}}
-          DATABRICKS_TOKEN: ${{secrets.prod_token}}
-          DATABRICKS_BUNDLE_ENV: prod
