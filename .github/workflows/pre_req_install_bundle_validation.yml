@@ -29,8 +29,8 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
         # Installs all project dependencies into the virtual environment
-      # - name: uv sync
-      #   run: uv sync --locked --all-extras --dev
+      - name: uv sync
+        run: uv sync --locked --all-extras --dev
 
         # Lint all files in the current directory
       # - name: ruff check
