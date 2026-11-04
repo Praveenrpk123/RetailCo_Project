@@ -117,7 +117,7 @@ df_trim_standardize = df_orders.\
     withColumn("customer_email", trim(col("customer_email"))).\
     withColumn("source_system", trim(col('source_system'))).\
     withColumn("unit_price_formatted", trim(col('unit_price_formatted')))
-print(df_trim_standardize.count())
+# print(df_trim_standardize.count())
 
 df_unit_price = df_trim_standardize.withColumn("up_flag", 
                    when(col('unit_price_formatted').try_cast('double').isNotNull(), True).
