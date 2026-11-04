@@ -117,7 +117,7 @@ df_trim_standardize = df_orders.\
     withColumn("customer_email", trim(col("customer_email"))).\
     withColumn("source_system", trim(col('source_system'))).\
     withColumn("unit_price_formatted", trim(col('unit_price_formatted')))
-print(df_trim_standardize.count())
+# print(df_trim_standardize.count())
 
 df_unit_price = df_trim_standardize.withColumn("up_flag", 
                    when(col('unit_price_formatted').try_cast('double').isNotNull(), True).
@@ -167,13 +167,6 @@ print(df_hash.count())
 df = df_hash.withColumn("rn", 
                    row_number().over(window_val)).filter(col('rn') == 1).\
                    drop(col('rn'), col('row_hash'))
-# display(df.filter(col('order_id') == 'ORD0211599'))                   
-                #    
-# display(df.limit(10))
-# print(df.count())
-# display(df.filter(col('up_flag') == True).count())
-# display(df.filter(col('up_flag') == False).count())
-# df.createOrReplaceTempView('fact_ord')
 
 # COMMAND ----------
 
