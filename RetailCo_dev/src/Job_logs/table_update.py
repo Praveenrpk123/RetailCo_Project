@@ -3,16 +3,16 @@
 # [tool.databricks.environment]
 # environment_version = "6"
 # ///
-dbutils.widgets.text('Job_id', '','')
-dbutils.widgets.text('Run_id', '','')
+dbutils.widgets.text("Job_id", "", "")
+dbutils.widgets.text("Run_id", "", "")
 
 # Declare the widget (required, even when running as a job) -- coming from DAB
 dbutils.widgets.text("catalog_name", "")
 dbutils.widgets.text("schema_name", "")
 
 
-job_id = dbutils.widgets.get('Job_id')
-run_id = dbutils.widgets.get('Run_id')
+job_id = dbutils.widgets.get("Job_id")
+run_id = dbutils.widgets.get("Run_id")
 
 # Retrieve the value
 catalog_name = dbutils.widgets.get("catalog_name")
