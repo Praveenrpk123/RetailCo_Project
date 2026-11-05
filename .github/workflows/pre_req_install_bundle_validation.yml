@@ -29,7 +29,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
       - name: lock UV
-        run: uv.lock
+        run: uv lock
 
         # Installs all project dependencies into the virtual environment
       - name: uv sync
