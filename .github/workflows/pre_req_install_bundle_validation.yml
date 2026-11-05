@@ -41,7 +41,7 @@ jobs:
 
         # Lint all files in the current directory
       - name: ruff check
-        run: uv run ruff check
+        run: uv run ruff check  .
       
          # format the files
       # - name: ruff format
