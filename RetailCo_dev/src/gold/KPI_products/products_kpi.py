@@ -1,7 +1,7 @@
 # Databricks notebook source
 # Declare the widget (required, even when running as a job) -- coming from DAB
-dbutils.widgets.text("catalog_name","RetailCo_Dev_Catalog")
-dbutils.widgets.text("schema_name", "RetailCo_Dev_schema")
+dbutils.widgets.text("catalog_name", "")
+dbutils.widgets.text("schema_name", "")
 
 # Retrieve the value
 catalog_name = dbutils.widgets.get("catalog_name")
@@ -14,7 +14,7 @@ schema_name = dbutils.widgets.get("schema_name")
 
 # COMMAND ----------
 
-top_5_selling_prods =  spark.sql(f"""
+top_5_selling_prods = spark.sql(f"""
             with prod_id_cte as (select ord.* , prod.product_id from 
             {catalog_name}.{schema_name}.fact_orders ord 
             join 
@@ -29,10 +29,9 @@ top_5_selling_prods =  spark.sql(f"""
             where rk  <= 5;
         """)
 
-top_5_selling_prods.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.Top_5_selling_products_overall")
+top_5_selling_prods.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.Top_5_selling_products_overall"
+)
 
 # COMMAND ----------
 

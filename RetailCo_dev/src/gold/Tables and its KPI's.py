@@ -30,16 +30,16 @@
 
 # COMMAND ----------
 
-#Total Net and Gross Revenue with total number of orders in each month
-#Highest no of orders shipped in a last 10 days.
-#Highest no of orders delivered in last 10 days.
-#Top 5 customers with more orders
-#Top 5 products with more orders
-#Top 5 products with quantity sold
-#Top 5 products with highest revenue
-#Total Quantity Sold
-#Order_Fulfillment_rate
-#Order Cancellation Rate
+# Total Net and Gross Revenue with total number of orders in each month
+# Highest no of orders shipped in a last 10 days.
+# Highest no of orders delivered in last 10 days.
+# Top 5 customers with more orders
+# Top 5 products with more orders
+# Top 5 products with quantity sold
+# Top 5 products with highest revenue
+# Total Quantity Sold
+# Order_Fulfillment_rate
+# Order Cancellation Rate
 # Order Return Rate
 # Average Delivery Time
 
@@ -60,7 +60,7 @@
 
 # COMMAND ----------
 
-#Total Orders Returned
+# Total Orders Returned
 # Top 5 products returned most
 # Top 5 customers returned most
 # total refund, gross amount, net amount

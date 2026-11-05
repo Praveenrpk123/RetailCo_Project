@@ -52,6 +52,8 @@ with this project. It's also possible to interact with it directly using the CLI
 
 3. Similarly, to deploy a production copy, type:
    ```
+   $ databricks bundle validate --target prod
+   <!-- $ databricks bundle summary --target prod -->
    $ databricks bundle deploy --target prod
    ```
    Note the default template has a includes a job that runs the pipeline every day
