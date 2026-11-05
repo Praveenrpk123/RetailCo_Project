@@ -30,6 +30,8 @@ jobs:
 
         # Installs all project dependencies into the virtual environment
       - name: uv sync
+        env:
+          UV_INDEX_URL: https://pypi.org/simple
         run: uv sync --locked --all-extras --dev
 
         # Lint all files in the current directory
