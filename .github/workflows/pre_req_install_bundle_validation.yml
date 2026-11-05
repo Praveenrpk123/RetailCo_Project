@@ -40,8 +40,8 @@ jobs:
         run: uv sync --all-extras --dev
 
         # Lint all files in the current directory
-      # - name: ruff check
-      #   run: uv run ruff check
+      - name: ruff check
+        run: uv run ruff check
       
          # format the files
       # - name: ruff format
