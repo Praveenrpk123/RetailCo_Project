@@ -190,4 +190,6 @@ order_kpi_rate = spark.sql(f"""with val_cte as (select
         avg_delivery_days
         from val_cte;""")
 
-order_kpi_rate.write.mode("overwrite").saveAsTable(f"{catalog_name}.{schema_name}.orders_kpi")
+order_kpi_rate.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.orders_kpi"
+)

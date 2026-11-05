@@ -1,6 +1,8 @@
 # Databricks notebook source
-import requests, json
+import json
 from datetime import datetime
+
+import requests
 from pyspark.sql.functions import *
 
 # COMMAND ----------
@@ -95,7 +97,8 @@ df_stage2 = (
 df_ctrl_table = spark.read.table(f"{catalog_name}.{schema_name}.job_logs")
 df_final = df_stage2.join(
     df_ctrl_table,
-    (df_stage2["task_name"] == df_ctrl_table["table_name"]) & (df_stage2["run_id"] == df_ctrl_table["run_id"]),
+    (df_stage2["task_name"] == df_ctrl_table["table_name"])
+    & (df_stage2["run_id"] == df_ctrl_table["run_id"]),
     "left",
 ).select(df_stage2["*"], df_ctrl_table["rows_read"], df_ctrl_table["rows_written"])
 

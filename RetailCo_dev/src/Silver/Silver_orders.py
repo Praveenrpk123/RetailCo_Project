@@ -4,13 +4,15 @@
 
 # COMMAND ----------
 
-from pyspark.sql.types import *
-from pyspark.sql.functions import *
-from pyspark.sql.window import Window
+import json
+import os
 from datetime import datetime
 from functools import reduce
+
 from delta.tables import DeltaTable
-import os, json
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+from pyspark.sql.window import Window
 
 # COMMAND ----------
 
@@ -221,7 +223,7 @@ with open(path, "r") as f:
                 )
             elif type(i["starts_with"]) == list:
                 df = df.filter(
-                    reduce(lambda x, y: x | y, [col(f'i["col_name"]').startswith(i) for i in i["starts_with"]])
+                    reduce(lambda x, y: x | y, [col('i["col_name"]').startswith(i) for i in i["starts_with"]])
                 )
                 new_count = df.count()
                 final_cnt = older_count - new_count

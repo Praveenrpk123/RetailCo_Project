@@ -1,6 +1,7 @@
 # Databricks notebook source
-from retailco import retailCo_pipeline
 from datetime import datetime
+
+from retailco import retailCo_pipeline
 
 # datas
 src = "src"

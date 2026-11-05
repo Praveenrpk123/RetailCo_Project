@@ -5,10 +5,10 @@
 # COMMAND ----------
 
 import json
-import time
 import os
-import requests
+import time
 from datetime import datetime
+
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 
@@ -85,7 +85,10 @@ with open(path) as f:
             df = (
                 spark.readStream.format("cloudFiles")
                 .option("cloudFiles.format", f"{fileformat}")
-                .option("cloudFiles.schemaLocation", f"/Volumes/{catalog_name}/{schema_name}/bronze/{filename}/schema")
+                .option(
+                    "cloudFiles.schemaLocation",
+                    f"/Volumes/{catalog_name}/{schema_name}/bronze/{filename}/schema",
+                )
                 .option(
                     "cloudFiles.schemaHints",
                     "product_id string, product_name string, category string, sub_category string, brand string, cost_price int, selling_price decimal(10,2), stock_qty int, supplier_id string",
@@ -106,7 +109,9 @@ with open(path) as f:
                     concat_ws(
                         "/",
                         slice(
-                            split(col("_metadata.file_path"), "/"), 1, size(split(col("_metadata.file_path"), "/")) - 1
+                            split(col("_metadata.file_path"), "/"),
+                            1,
+                            size(split(col("_metadata.file_path"), "/")) - 1,
                         ),
                     ),
                 )
@@ -118,8 +123,13 @@ with open(path) as f:
                 df.writeStream.format("delta")
                 .outputMode("append")
                 .option("mergeSchema", "true")
-                .option("checkpointLocation", f"/Volumes/{catalog_name}/{schema_name}/bronze/{filename}/checkpoint")
-                .option("path", f"/Volumes/{catalog_name}/{schema_name}/bronze/{filename}/")
+                .option(
+                    "checkpointLocation",
+                    f"/Volumes/{catalog_name}/{schema_name}/bronze/{filename}/checkpoint",
+                )
+                .option(
+                    "path", f"/Volumes/{catalog_name}/{schema_name}/bronze/{filename}/"
+                )
                 .trigger(availableNow=True)
                 .start()
             )
@@ -128,7 +138,10 @@ with open(path) as f:
                 spark.readStream.format("cloudFiles")
                 .option("cloudFiles.format", f"{fileformat}")
                 .option("cloudFiles.inferSchema", "true")
-                .option("cloudFiles.schemaLocation", f"/Volumes/{catalog_name}/{schema_name}/bronze/{filename}/schema")
+                .option(
+                    "cloudFiles.schemaLocation",
+                    f"/Volumes/{catalog_name}/{schema_name}/bronze/{filename}/schema",
+                )
                 .load(f"/Volumes/{catalog_name}/{schema_name}/raw_data/{filename}")
             )
 
@@ -143,7 +156,9 @@ with open(path) as f:
                     concat_ws(
                         "/",
                         slice(
-                            split(col("_metadata.file_path"), "/"), 1, size(split(col("_metadata.file_path"), "/")) - 1
+                            split(col("_metadata.file_path"), "/"),
+                            1,
+                            size(split(col("_metadata.file_path"), "/")) - 1,
                         ),
                     ),
                 )
@@ -155,8 +170,13 @@ with open(path) as f:
                 df.writeStream.format("delta")
                 .outputMode("append")
                 .option("mergeSchema", "true")
-                .option("checkpointLocation", f"/Volumes/{catalog_name}/{schema_name}/bronze/{filename}/checkpoint")
-                .option("path", f"/Volumes/{catalog_name}/{schema_name}/bronze/{filename}/")
+                .option(
+                    "checkpointLocation",
+                    f"/Volumes/{catalog_name}/{schema_name}/bronze/{filename}/checkpoint",
+                )
+                .option(
+                    "path", f"/Volumes/{catalog_name}/{schema_name}/bronze/{filename}/"
+                )
                 .trigger(availableNow=True)
                 .start()
             )

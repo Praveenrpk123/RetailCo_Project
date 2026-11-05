@@ -4,12 +4,14 @@
 
 # COMMAND ----------
 
-from pyspark.sql.types import *
-from pyspark.sql.functions import *
+import json
+import os
 from datetime import datetime
-from pyspark.sql.window import Window
+
 from delta.tables import DeltaTable
-import os, json
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+from pyspark.sql.window import Window
 from utils.retailco_dq import retailco_dq
 
 # COMMAND ----------
@@ -69,7 +71,11 @@ else:
 path = f"/Volumes/{catalog_name}/{schema_name}/bronze/store_events/"
 
 ##Data should be greater than last batch run - Incremental loading
-df_store_events = spark.read.format("delta").load(path).filter(col("ingested_timestamp") > lit(max_timestamp))
+df_store_events = (
+    spark.read.format("delta")
+    .load(path)
+    .filter(col("ingested_timestamp") > lit(max_timestamp))
+)
 
 # if count of our data is zero, Need to get out from this notebook(It will skip it)
 # and inserting in our job logs with value as 0, else continue..
@@ -96,7 +102,15 @@ init_cnt = df_store_events.count()
 
 window_val = Window.partitionBy(col("row_hash")).orderBy(col("ingested_timestamp"))
 
-un_col = ["_rescued_data", "Ingested_timestamp", "file_name", "Job_id", "Run_id", "folder_path", "record_hash"]
+un_col = [
+    "_rescued_data",
+    "Ingested_timestamp",
+    "file_name",
+    "Job_id",
+    "Run_id",
+    "folder_path",
+    "record_hash",
+]
 cols = []
 print(df_store_events.count())
 for i in df_store_events.columns:
@@ -105,7 +119,11 @@ for i in df_store_events.columns:
 
 df_hash = df_store_events.withColumn("row_hash", sha2(concat_ws("-", *cols), 256))
 
-df = df_hash.withColumn("rn", row_number().over(window_val)).filter(col("rn") == 1).drop(col("rn"))
+df = (
+    df_hash.withColumn("rn", row_number().over(window_val))
+    .filter(col("rn") == 1)
+    .drop(col("rn"))
+)
 # display(df.limit(10))
 # print(df.count())
 
@@ -154,7 +172,6 @@ display(df_standardize.limit(10))
 
 # COMMAND ----------
 
-import os
 
 path = os.path.abspath("../config_files/silver_configs/silver_store_events_dq.json")
 with open(path, "r") as f:
@@ -177,7 +194,11 @@ with open(path, "r") as f:
             print(msg)
 
         # Date DataType check
-        if i["check"] == "date_dataType_check" and i["check_type"] != None and i["enabled"] == True:
+        if (
+            i["check"] == "date_dataType_check"
+            and i["check_type"] != None
+            and i["enabled"] == True
+        ):
             df, msg = rc_dq.datatype_check(
                 job_id=job_id,
                 run_id=run_id,
@@ -192,7 +213,11 @@ with open(path, "r") as f:
             print(msg)
 
         # sequence check
-        if i["check"] == "sequence_ck" and i["check_list"] != None and i["enabled"] == True:
+        if (
+            i["check"] == "sequence_ck"
+            and i["check_list"] != None
+            and i["enabled"] == True
+        ):
             old_cnt = df.count()
             if type(i["check_list"]) == list:
                 df, msg = rc_dq.sequence_check(
@@ -252,7 +277,9 @@ df_dq = (
 # COMMAND ----------
 
 # dim customers
-df_cust = spark.read.table(f"{catalog_name}.{schema_name}.dim_customers").filter(col("is_active") == True)
+df_cust = spark.read.table(f"{catalog_name}.{schema_name}.dim_customers").filter(
+    col("is_active") == True
+)
 
 # fact_orders
 df_ord = spark.read.table(f"{catalog_name}.{schema_name}.fact_orders")
@@ -262,12 +289,16 @@ df_return_ents = spark.read.table(f"{catalog_name}.{schema_name}.dim_return_even
 
 # Joining final results based on dim customer table and exchanging customer_id with customer_sk
 df_cust_join = (
-    df_dq.join(df_cust, "customer_id", "inner").select(df_dq["*"], df_cust["customer_sk"]).drop("customer_id")
+    df_dq.join(df_cust, "customer_id", "inner")
+    .select(df_dq["*"], df_cust["customer_sk"])
+    .drop("customer_id")
 )
 
 # Joining customer results based on  fact orders table and exchanging order_id with order_sk
 df_ord_join = (
-    df_cust_join.join(df_ord, "order_id", "inner").select(df_cust_join["*"], df_ord["order_sk"]).drop("order_id")
+    df_cust_join.join(df_ord, "order_id", "inner")
+    .select(df_cust_join["*"], df_ord["order_sk"])
+    .drop("order_id")
 )
 
 # Joining orders results based on dim return events table and exchanging event_type with event_type_id
@@ -312,7 +343,9 @@ max_dt = max_ts.collect()[0]["max_dt"]
 # If a particular table exists
 if spark.catalog.tableExists(f"{catalog_name}.{schema_name}.fact_store_events"):
     # Getting Target Delta table
-    target = DeltaTable.forName(spark, f"{catalog_name}.{schema_name}.fact_store_events")
+    target = DeltaTable.forName(
+        spark, f"{catalog_name}.{schema_name}.fact_store_events"
+    )
     target_df = target.toDF()
 
     # if target is not an empty table

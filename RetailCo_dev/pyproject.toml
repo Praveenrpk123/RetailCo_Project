@@ -31,7 +31,14 @@ build-backend = "hatchling.build"
 packages = ["RetailCo_Project/RetailCo_dev"] 
 
 [tool.ruff]
-line-length = 120
+exclude = [
+    "src/Bronze/Bronze_demo.py",
+    "src/Silver/Silver_orders.py"
+]
+
+[tool.ruff.lint]
+ignore = ["F821", "EXE002", "SIM102"]
+
 
 [tool.databricks.environment]
 environment_version = '6'
