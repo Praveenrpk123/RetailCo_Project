@@ -8,13 +8,13 @@
 
 # COMMAND ----------
 
-from pyspark.sql.types import *
+import json
+import os
+from datetime import datetime
+
 from pyspark.sql.functions import *
+from pyspark.sql.types import *
 from pyspark.sql.window import Window
-from datetime import date, timedelta, datetime
-import os, json
-from functools import reduce
-import sys
 
 # print(sys.path)
 # path = os.path.abspath('../')
@@ -22,7 +22,7 @@ import sys
 # sys.path.append(path)
 # print(sys.path)
 from utils.retailco_dq import retailco_dq
-from utils.retailco_log import retailco_log
+
 # from utils.retailco_log import job_logs
 
 
@@ -102,7 +102,11 @@ path = f"/Volumes/{catalog_name}/{schema_name}/bronze/customers/"
 
 ##Data should be greater than last batch run - Incremental loading
 
-df = spark.read.format("delta").load(path).filter(col("ingested_timestamp") > lit(max_timestamp))
+df = (
+    spark.read.format("delta")
+    .load(path)
+    .filter(col("ingested_timestamp") > lit(max_timestamp))
+)
 # initial records count
 init_cnt = df.count()
 
@@ -140,8 +144,12 @@ if df.count() == 0:
 
 # COMMAND ----------
 
-window_val = Window.partitionBy(col("customer_id")).orderBy(desc(col("registration_date")))
-df = df.withColumn("rn", row_number().over(window_val)).filter(col("rn") == 1).drop("rn")
+window_val = Window.partitionBy(col("customer_id")).orderBy(
+    desc(col("registration_date"))
+)
+df = (
+    df.withColumn("rn", row_number().over(window_val)).filter(col("rn") == 1).drop("rn")
+)
 
 # COMMAND ----------
 
@@ -208,7 +216,9 @@ df = (
 
 # COMMAND ----------
 
-window_val = Window.partitionBy(col("customer_id")).orderBy(desc(col("registration_date")))
+window_val = Window.partitionBy(col("customer_id")).orderBy(
+    desc(col("registration_date"))
+)
 df = df.withColumn("pk_record_cnt", row_number().over(window_val)).withColumn(
     "is_active", when(col("pk_record_cnt") != 1, False).otherwise(True)
 )
@@ -362,7 +372,12 @@ with open(path, "r") as f:
             print(msg)
 
         # datatype_validation and update
-        if i["check"] == "datatype_val" and i["check_type"] != None and i["col_name"] != None and i["enabled"] == True:
+        if (
+            i["check"] == "datatype_val"
+            and i["check_type"] != None
+            and i["col_name"] != None
+            and i["enabled"] == True
+        ):
             df, msg = rc_dq.datatype_check(
                 job_id=job_id,
                 run_id=run_id,
@@ -391,26 +406,36 @@ df = df.withColumn(
 # Region = ['North', 'East', 'South', 'Central', 'West']
 df = df.withColumn(
     "region",
-    when(col("region").isin("North", "East", "South", "Central", "West"), col("region")).when(
-        col("region").isNull() | col("region") == "", lit("Unknown")
-    ),
+    when(
+        col("region").isin("North", "East", "South", "Central", "West"), col("region")
+    ).when(col("region").isNull() | col("region") == "", lit("Unknown")),
 )
 
 # State -is Null Then Unknown
 df_stage = df.withColumn(
-    "state", when((col("state").isNull()) | (col("state") == lit("")), lit("Unknown")).otherwise(col("state"))
+    "state",
+    when((col("state").isNull()) | (col("state") == lit("")), lit("Unknown")).otherwise(
+        col("state")
+    ),
 )
 # display(df_stage)
 
 # COMMAND ----------
 
-window_val = Window.partitionBy(col("customer_id")).orderBy(desc(col("registration_date")))
+window_val = Window.partitionBy(col("customer_id")).orderBy(
+    desc(col("registration_date"))
+)
 # Adding effective from, effective to and ingested timestamp
 df_stage2 = (
-    df_stage.withColumn("lag_val", date_add(lag(col("registration_date")).over(window_val), -1))
+    df_stage.withColumn(
+        "lag_val", date_add(lag(col("registration_date")).over(window_val), -1)
+    )
     .withColumn(
         "effective_to",
-        when(col("lag_val").isNull(), to_date(date_format(lit("9999-12-31"), "yyyy-MM-dd"))).otherwise(col("lag_val")),
+        when(
+            col("lag_val").isNull(),
+            to_date(date_format(lit("9999-12-31"), "yyyy-MM-dd")),
+        ).otherwise(col("lag_val")),
     )
     .withColumnRenamed("registration_date", "effective_from")
     .withColumnRenamed("Ingested_timestamp", "ingested_timestamp")
@@ -468,7 +493,10 @@ if spark.catalog.tableExists(f"{catalog_name}.{schema_name}.dim_customers"):
         # Step 1: Doing left outer join with source and target table based on customer_id column
         match_df = df_final.join(
             target_df,
-            ((df_final["customer_id"] == target_df["customer_id"]) & (target_df["is_active"] == True)),
+            (
+                (df_final["customer_id"] == target_df["customer_id"])
+                & (target_df["is_active"] == True)
+            ),
             "left_outer",
         ).select(
             df_final["*"],
@@ -488,7 +516,8 @@ if spark.catalog.tableExists(f"{catalog_name}.{schema_name}.dim_customers"):
         )
         # Step 2: Getting only the records whose effective from is greater than targets effective from
         match_df = match_df.filter(
-            (col("effective_from") > col("tgt_effective_from")) | (col("tgt_effective_from").isNull())
+            (col("effective_from") > col("tgt_effective_from"))
+            | (col("tgt_effective_from").isNull())
         )
 
         # for insert all rows - filter the rows whose
@@ -496,11 +525,16 @@ if spark.catalog.tableExists(f"{catalog_name}.{schema_name}.dim_customers"):
         # target record hash will be null only when source doesn't matches
         # target and source record hash != meaning no EXACT Matching records.
         filter_hash_df = match_df.filter(
-            (col("record_hash") != col("tgt_record_hash")) | (col("tgt_record_hash").isNull())
-        ).withColumn("merge_key", concat_ws("||", col("customer_id"), col("customer_id")))
+            (col("record_hash") != col("tgt_record_hash"))
+            | (col("tgt_record_hash").isNull())
+        ).withColumn(
+            "merge_key", concat_ws("||", col("customer_id"), col("customer_id"))
+        )
 
         # find records to be updated - if target record hash is not null it means source and target is matching by key column
-        update_df = match_df.filter(col("tgt_record_hash").isNotNull()).withColumn("merge_key", lit(None))
+        update_df = match_df.filter(col("tgt_record_hash").isNotNull()).withColumn(
+            "merge_key", lit(None)
+        )
 
         # Union both
         union_df = filter_hash_df.union(update_df)

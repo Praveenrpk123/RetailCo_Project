@@ -22,7 +22,9 @@ new_customers_this_month = spark.sql(f"""with cte as (
     select  count(customer_id) as cnt from cte where rn = 1 and effective_from >= current_month_start_date;""")
 
 
-new_customers_this_month.write.mode("overwrite").saveAsTable(f"{catalog_name}.{schema_name}.new_customers_this_month")
+new_customers_this_month.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.new_customers_this_month"
+)
 
 
 # COMMAND ----------
@@ -41,7 +43,9 @@ new_customers_90_days = spark.sql(f"""with cte as (
     select count(*) as New_customers_1_year from cte 
     where effective_from >= effective_start_date and rn = 1;""")
 
-new_customers_90_days.write.mode("overwrite").saveAsTable(f"{catalog_name}.{schema_name}.new_customers_90_days")
+new_customers_90_days.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.new_customers_90_days"
+)
 
 # COMMAND ----------
 
@@ -59,7 +63,9 @@ new_customers_180_days = spark.sql(f"""with cte as (
     from {catalog_name}.{schema_name}.dim_customers) 
     select count(*) as New_customers_1_year from cte where effective_from >= effective_start_date;""")
 
-new_customers_180_days.write.mode("overwrite").saveAsTable(f"{catalog_name}.{schema_name}.new_customers_180_days")
+new_customers_180_days.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.new_customers_180_days"
+)
 
 # COMMAND ----------
 
@@ -77,7 +83,9 @@ new_customers_1_year = spark.sql(f"""with cte as (
     select count(customer_id) as New_customers_1_year from cte 
     where effective_from >= effective_start_date and rn = 1;""")
 
-new_customers_1_year.write.mode("overwrite").saveAsTable(f"{catalog_name}.{schema_name}.new_customers_1_year")
+new_customers_1_year.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.new_customers_1_year"
+)
 
 # COMMAND ----------
 

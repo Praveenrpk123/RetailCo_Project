@@ -18,7 +18,9 @@ total_events_stored = spark.sql(
     f"""select count(*) as total_events from {catalog_name}.{schema_name}.fact_store_events"""
 )
 
-total_events_stored.write.mode("overwrite").saveAsTable(f"{catalog_name}.{schema_name}.total_events_stored")
+total_events_stored.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.total_events_stored"
+)
 
 # COMMAND ----------
 

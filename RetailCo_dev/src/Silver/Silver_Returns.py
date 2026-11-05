@@ -4,12 +4,14 @@
 
 # COMMAND ----------
 
-from pyspark.sql.types import *
-from pyspark.sql.functions import *
-import os, json
-from datetime import datetime, timedelta
-from pyspark.sql.window import Window
+import json
+import os
+from datetime import datetime
+
 from delta.tables import DeltaTable
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+from pyspark.sql.window import Window
 
 # COMMAND ----------
 
@@ -65,7 +67,11 @@ display(max_timestamp)
 path = "/Volumes/retailco/retailco_schema/bronze/returns/"
 
 # Data should be greater than last batch run - Incremental loading
-df_returns = spark.read.format("delta").load(path).filter(col("ingested_timestamp") > lit(max_timestamp))
+df_returns = (
+    spark.read.format("delta")
+    .load(path)
+    .filter(col("ingested_timestamp") > lit(max_timestamp))
+)
 
 # if count of our data is zero, Need to get out from this notebook(It will skip it)
 # and inserting in our job logs with value as 0, else continue..
@@ -98,9 +104,9 @@ df_trim = (
 )
 
 
-df_standardize = df_trim.withColumn("refund_amount", round(col("refund_amount").cast("double"), 2)).drop(
-    "file_name", "Job_Id", "Run_id", "folder_path"
-)
+df_standardize = df_trim.withColumn(
+    "refund_amount", round(col("refund_amount").cast("double"), 2)
+).drop("file_name", "Job_Id", "Run_id", "folder_path")
 
 # COMMAND ----------
 
@@ -155,19 +161,25 @@ with open(path, "r") as f:
             final_cnt = older_count - new_count
             total_checks += 1
             perc += 1 - (final_cnt / older_count)
-            print(f"No of records dropped due to {i['check']} check for {i['col_name']} is {older_count - new_count}")
+            print(
+                f"No of records dropped due to {i['check']} check for {i['col_name']} is {older_count - new_count}"
+            )
 
         # Date DataType_check
         if i["check"] == "date_dataType_check" and i["check_type"] != None:
             old_cnt = df.count()
-            df = df.filter(col(f"{i['col_name']}").try_cast(f"{i['check_type']}").isNotNull()).withColumn(
+            df = df.filter(
+                col(f"{i['col_name']}").try_cast(f"{i['check_type']}").isNotNull()
+            ).withColumn(
                 f"{i['col_name']}", col(f"{i['col_name']}").cast(f"{i['check_type']}")
             )
             new_count = df.count()
             final_cnt = older_count - new_count
             total_checks += 1
             perc += 1 - (final_cnt / older_count)
-            print(f"No of records dropped due to {i['check']} check for {i['col_name']} is {old_cnt - new_count}")
+            print(
+                f"No of records dropped due to {i['check']} check for {i['col_name']} is {old_cnt - new_count}"
+            )
 
         # Greater than some value
         if i["check"] == "greater_than" and i["value_to_ck"] != None:
@@ -177,7 +189,9 @@ with open(path, "r") as f:
             final_cnt = older_count - new_count
             total_checks += 1
             perc += 1 - (final_cnt / older_count)
-            print(f"No of records dropped due to {i['check']} check for {i['col_name']} is {older_count - new_count}")
+            print(
+                f"No of records dropped due to {i['check']} check for {i['col_name']} is {older_count - new_count}"
+            )
     print("Data Quality Perc is : ", (perc / total_checks) * 100)
 
 # sequence_check
@@ -199,10 +213,14 @@ print(df_dq.count())
 # COMMAND ----------
 
 # dim customers
-df_cust_join = spark.read.table("retailco.retailco_schema.dim_customers").filter(col("is_active") == True)
+df_cust_join = spark.read.table("retailco.retailco_schema.dim_customers").filter(
+    col("is_active") == True
+)
 
 # dim products
-df_prod_join = spark.read.table("retailco.retailco_schema.dim_products").filter(col("is_active") == True)
+df_prod_join = spark.read.table("retailco.retailco_schema.dim_products").filter(
+    col("is_active") == True
+)
 
 # fact_orders
 df_order_join = spark.read.table("retailco.retailco_schema.fact_orders")
@@ -210,7 +228,9 @@ df_order_join = spark.read.table("retailco.retailco_schema.fact_orders")
 
 # Joining final results based on dim customer table and exchanging customer_id with customer_sk
 df_cust = (
-    df_dq.join(df_cust_join, (df_dq["customer_id"] == df_cust_join["customer_id"]), "inner")
+    df_dq.join(
+        df_cust_join, (df_dq["customer_id"] == df_cust_join["customer_id"]), "inner"
+    )
     .select(df_dq["*"], df_cust_join["customer_sk"])
     .drop("customer_id")
 )
@@ -218,7 +238,9 @@ print(df_cust.count())
 
 # Joining customer results based on dim products table and exchanging product_id with product_sk
 df_prod = (
-    df_cust.join(df_prod_join, df_prod_join["product_id"] == df_cust["product_id"], "inner")
+    df_cust.join(
+        df_prod_join, df_prod_join["product_id"] == df_cust["product_id"], "inner"
+    )
     .select(df_cust["*"], df_prod_join["product_sk"])
     .drop("product_id")
 )
@@ -227,7 +249,12 @@ print("before_cnt", df_prod.count())
 # Joining products results based on fact orders table and exchanging order_id with order_sk and getting few more columns
 df_orders_stg = (
     df_order_join.join(
-        df_prod, ((df_order_join["order_id"] == df_prod["order_id"]) & (df_order_join["status"] == "Returned")), "inner"
+        df_prod,
+        (
+            (df_order_join["order_id"] == df_prod["order_id"])
+            & (df_order_join["status"] == "Returned")
+        ),
+        "inner",
     )
     .select(
         df_prod["*"],
@@ -242,7 +269,9 @@ df_orders_stg = (
 # print('after_cnt',df_orders_stg.count())
 
 # Selecting the final values to be displayed in a returns table.
-df_final = df_orders_stg.withColumnRenamed("Ingested_timestamp", "ingested_timestamp").select(
+df_final = df_orders_stg.withColumnRenamed(
+    "Ingested_timestamp", "ingested_timestamp"
+).select(
     "return_id",
     "order_sk",
     "product_sk",

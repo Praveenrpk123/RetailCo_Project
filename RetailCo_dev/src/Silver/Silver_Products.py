@@ -4,14 +4,16 @@
 
 # COMMAND ----------
 
-from pyspark.sql.types import *
-from pyspark.sql.functions import *
-from datetime import datetime, timedelta, date
-from pyspark.sql.window import Window
-from functools import reduce
-from delta.tables import DeltaTable
-import os, json
+import json
+import os
 import random
+from datetime import date, datetime
+from functools import reduce
+
+from delta.tables import DeltaTable
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+from pyspark.sql.window import Window
 
 # COMMAND ----------
 
@@ -66,7 +68,11 @@ else:
 
 path = "/Volumes/retailco/retailco_schema/bronze/products/"
 # Data should be greater than last batch run - Incremental loading
-df = spark.read.format("delta").load(path).filter(col("ingested_timestamp") > lit(max_timestamp))
+df = (
+    spark.read.format("delta")
+    .load(path)
+    .filter(col("ingested_timestamp") > lit(max_timestamp))
+)
 
 # if count of our data is zero, Need to get out from this notebook(It will skip it)
 # and inserting in our job logs with value as 0, else continue..
@@ -138,7 +144,9 @@ df = df.withColumn(
     ),
 )
 
-df = df.withColumn("rn", row_number().over(window_val)).filter(col("rn") == 1).drop("rn")
+df = (
+    df.withColumn("rn", row_number().over(window_val)).filter(col("rn") == 1).drop("rn")
+)
 
 # display(df.limit(10))
 
@@ -164,7 +172,9 @@ with open(path, "r") as f:
             final_cnt = older_count - new_count
             total_checks += 1
             # perc += 1 - (final_cnt/older_count)
-            print(f"No of records dropped due to {i['check']} check for {i['col_name']} is {older_count - new_count}")
+            print(
+                f"No of records dropped due to {i['check']} check for {i['col_name']} is {older_count - new_count}"
+            )
 
         if i["check"] == "gt_zero" and i["enabled"] == True:
             older_count = df.count()
@@ -173,14 +183,23 @@ with open(path, "r") as f:
             final_cnt = older_count - new_count
             total_checks += 1
             # perc += 1 - (final_cnt/older_count)
-            print(f"No of records dropped due to {i['check']} check for {i['col_name']} is {older_count - new_count}")
+            print(
+                f"No of records dropped due to {i['check']} check for {i['col_name']} is {older_count - new_count}"
+            )
 
         # starts with i["check"] for Customer_Id etc..
-        if i["check"] == "pattern" and i["starts_with"] != None and i["ends_with"] == "none" and i["enabled"] == True:
+        if (
+            i["check"] == "pattern"
+            and i["starts_with"] != None
+            and i["ends_with"] == "none"
+            and i["enabled"] == True
+        ):
             older_count = df.count()
             if type(i["starts_with"]) == str:
                 # df = df.filter(col(f'{i["col_name"]}').startswith(f'{i["starts_with"]}'))
-                df = df.filter(col(f"{i['col_name']}").rlike(f"^{i['starts_with']}[0-9]+$"))
+                df = df.filter(
+                    col(f"{i['col_name']}").rlike(f"^{i['starts_with']}[0-9]+$")
+                )
                 new_count = df.count()
                 final_cnt = older_count - new_count
                 total_checks += 1
@@ -190,7 +209,13 @@ with open(path, "r") as f:
                 )
             elif type(i["starts_with"]) == list:
                 df = df.filter(
-                    reduce(lambda x, y: x | y, [col(f"{i['col_name']}").startswith(sw) for sw in i["starts_with"]])
+                    reduce(
+                        lambda x, y: x | y,
+                        [
+                            col(f"{i['col_name']}").startswith(sw)
+                            for sw in i["starts_with"]
+                        ],
+                    )
                 )
                 new_count = df.count()
                 final_cnt = older_count - new_count
@@ -201,16 +226,24 @@ with open(path, "r") as f:
                 )
 
         # Handling other datatypes
-        if i["check"] == "datatype_handling" and i["check_type"] != None and i["enabled"] == True:
+        if (
+            i["check"] == "datatype_handling"
+            and i["check_type"] != None
+            and i["enabled"] == True
+        ):
             old_cnt = df.count()
-            df = df.filter(col(f"{i['col_name']}").cast(f"{i['check_type']}").isNotNull()).withColumn(
+            df = df.filter(
+                col(f"{i['col_name']}").cast(f"{i['check_type']}").isNotNull()
+            ).withColumn(
                 f"{i['col_name']}", col(f"{i['col_name']}").cast(f"{i['check_type']}")
             )
             new_count = df.count()
             final_cnt = older_count - new_count
             total_checks += 1
             # perc += 1 - (final_cnt/older_count)
-            print(f"No of records dropped due to {i['check']} check for {i['col_name']} is {older_count - new_count}")
+            print(
+                f"No of records dropped due to {i['check']} check for {i['col_name']} is {older_count - new_count}"
+            )
     # Data quality for this pipeline
     print("Data Quality Perc is : ", (perc / total_checks) * 100)
 df_dq = df
@@ -230,15 +263,18 @@ rand_days = random.randrange(days_between_dates)
 # date_add(start_date, rand_days)
 # effective_from
 # the issue we faced is rand() * days_between_dates will give decimal once floor operation applied
-df_eff_from = df_dq.withColumn("rand_days", floor(rand() * days_between_dates).cast("int")).withColumn(
-    "effective_from", lit(date_add(lit(start_date), col("rand_days")))
-)
+df_eff_from = df_dq.withColumn(
+    "rand_days", floor(rand() * days_between_dates).cast("int")
+).withColumn("effective_from", lit(date_add(lit(start_date), col("rand_days"))))
 
 df_eff_to = (
     df_eff_from.withColumn("rn", row_number().over(window_val))
     .withColumn("lag_val", lag(col("effective_from")).over(window_val))
     .withColumn(
-        "effective_to", when(col("lag_val").isNull(), lit((date(9999, 1, 1)))).otherwise(date_add(col("lag_val"), -1))
+        "effective_to",
+        when(col("lag_val").isNull(), lit(date(9999, 1, 1))).otherwise(
+            date_add(col("lag_val"), -1)
+        ),
     )
     .withColumn("is_active", when(col("rn") == 1, True).otherwise(False))
     .withColumnRenamed("Ingested_timestamp", "ingested_timestamp")
@@ -287,7 +323,10 @@ if spark.catalog.tableExists("retailco.retailco_schema.dim_products"):
         # Step 1: Doing left outer join with source and target table based on customer_id column
         lo_join = df_final.join(
             target_df,
-            ((target_df["product_id"] == df_final["product_id"]) & (target_df["is_active"] == True)),
+            (
+                (target_df["product_id"] == df_final["product_id"])
+                & (target_df["is_active"] == True)
+            ),
             "left_outer",
         ).select(
             df_final["*"],
@@ -308,11 +347,14 @@ if spark.catalog.tableExists("retailco.retailco_schema.dim_products"):
         )
         # Step 2: Getting only the records whose effective from is greater than targets effective from
         lo_join = lo_join.filter(
-            (col("effective_from") > col("tgt_effective_from")) | (col("tgt_effective_from").isNull())
+            (col("effective_from") > col("tgt_effective_from"))
+            | (col("tgt_effective_from").isNull())
         )
 
         # find records to be updated - if target record hash is not null it means source and target is matching by key column
-        filter_df = lo_join.filter((col("tgt_record_hash").isNotNull())).withColumn("merge_key", lit(None))
+        filter_df = lo_join.filter(col("tgt_record_hash").isNotNull()).withColumn(
+            "merge_key", lit(None)
+        )
         # display(filter_df)
 
         # for insert all rows - filter the rows whose
@@ -320,7 +362,8 @@ if spark.catalog.tableExists("retailco.retailco_schema.dim_products"):
         # target record hash will be null only when source doesn't matches
         # target and source record hash != meaning no EXACT Matching records.
         match_df = lo_join.filter(
-            (col("tgt_record_hash") != col("record_hash")) | (col("tgt_record_hash").isNull())
+            (col("tgt_record_hash") != col("record_hash"))
+            | (col("tgt_record_hash").isNull())
         ).withColumn("merge_key", concat_ws("||", col("product_id"), col("product_id")))
         # display(match_df)
 

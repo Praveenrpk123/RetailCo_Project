@@ -4,14 +4,16 @@
 
 # COMMAND ----------
 
-from pyspark.sql.types import *
-from pyspark.sql.functions import *
-from pyspark.sql.window import Window
+import json
+import os
 from datetime import datetime
-from functools import reduce
+
 from delta.tables import DeltaTable
-import os, json, sys
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+from pyspark.sql.window import Window
 from utils.retailco_dq import retailco_dq
+
 # from utils.retailco import retailCo_pipeline
 # print(sys.path)
 # COMMON_PATH = os.path.abspath('../')
@@ -81,7 +83,11 @@ display(max_timestamp)
 path = f"/Volumes/{catalog_name}/{schema_name}/bronze/orders/"
 
 # Data should be greater than last batch run - Incremental loading
-df_orders = spark.read.format("delta").load(path).filter(col("ingested_timestamp") > lit(max_timestamp))
+df_orders = (
+    spark.read.format("delta")
+    .load(path)
+    .filter(col("ingested_timestamp") > lit(max_timestamp))
+)
 
 # if count of our data is zero, Need to get out from this notebook(It will skip it)
 # and inserting in our job logs with value as 0, else continue..
@@ -123,7 +129,10 @@ df_trim_standardize = (
 # print(df_trim_standardize.count())
 
 df_unit_price = df_trim_standardize.withColumn(
-    "up_flag", when(col("unit_price_formatted").try_cast("double").isNotNull(), True).otherwise(False)
+    "up_flag",
+    when(col("unit_price_formatted").try_cast("double").isNotNull(), True).otherwise(
+        False
+    ),
 ).drop("file_name", "Job_Id", "Run_id", "folder_path")
 
 
@@ -154,7 +163,9 @@ df_up = df_unit_price.withColumn(
 
 # COMMAND ----------
 
-window_val = Window.partitionBy(col("row_hash")).orderBy(desc(col("ingested_timestamp")), (desc(col("up_flag"))))
+window_val = Window.partitionBy(col("row_hash")).orderBy(
+    desc(col("ingested_timestamp")), (desc(col("up_flag")))
+)
 
 un_col = [
     "up_flag",
@@ -176,7 +187,11 @@ print(cols)
 df_hash = df_up.withColumn("row_hash", sha2(concat_ws("-", *cols), 256))
 
 print(df_hash.count())
-df = df_hash.withColumn("rn", row_number().over(window_val)).filter(col("rn") == 1).drop(col("rn"), col("row_hash"))
+df = (
+    df_hash.withColumn("rn", row_number().over(window_val))
+    .filter(col("rn") == 1)
+    .drop(col("rn"), col("row_hash"))
+)
 
 # COMMAND ----------
 
@@ -205,7 +220,11 @@ with open(path, "r") as f:
             print(msg)
 
         # DataType handling
-        if i["check"] == "datatype_handling" and i["check_type"] != None and i["enabled"] == True:
+        if (
+            i["check"] == "datatype_handling"
+            and i["check_type"] != None
+            and i["enabled"] == True
+        ):
             df, msg = rc_dq.datatype_check(
                 job_id=job_id,
                 run_id=run_id,
@@ -220,7 +239,11 @@ with open(path, "r") as f:
             print(msg)
 
         # Starts with issue
-        if i["check"] == "pattern" and i["starts_with"] != None and i["enabled"] == True:
+        if (
+            i["check"] == "pattern"
+            and i["starts_with"] != None
+            and i["enabled"] == True
+        ):
             older_count = df.count()
             if type(i["starts_with"]) == str:
                 df, msg = rc_dq.str_startswith_check(
@@ -250,7 +273,11 @@ with open(path, "r") as f:
                 print(msg)
 
         # Greater than some value
-        if i["check"] == "greater_than" and i["value_to_ck"] != None and i["enabled"] == True:
+        if (
+            i["check"] == "greater_than"
+            and i["value_to_ck"] != None
+            and i["enabled"] == True
+        ):
             older_count = df.count()
             date_val = current_date()
             if i["value_to_ck"] == "current_date":
@@ -282,7 +309,11 @@ with open(path, "r") as f:
                 print(msg)
 
         # Less than some value
-        if i["check"] == "less_than" and i["value_to_ck"] != None and i["enabled"] == True:
+        if (
+            i["check"] == "less_than"
+            and i["value_to_ck"] != None
+            and i["enabled"] == True
+        ):
             date_val = current_date()
             if i["value_to_ck"] == "current_date":
                 df, msg = rc_dq.lt_date_check(
@@ -312,7 +343,11 @@ with open(path, "r") as f:
                 print(msg)
 
         # sequence presence
-        if i["check"] == "sequence_ck" and i["check_list"] != None and i["enabled"] == True:
+        if (
+            i["check"] == "sequence_ck"
+            and i["check_list"] != None
+            and i["enabled"] == True
+        ):
             if type(i["check_list"]) == list:
                 df, msg = rc_dq.sequence_check(
                     job_id=job_id,
@@ -340,7 +375,9 @@ df_extra = (
     .withColumnRenamed("total_amount", "net_amount")
     .withColumnRenamed("Ingested_timestamp", "ingested_timestamp")
     .withColumn("discount_amount", round(col("gross_amount") - col("net_amount"), 2))
-    .withColumn("delivery_date", date_add(col("order_date"), col("delivery_days").cast("int")))
+    .withColumn(
+        "delivery_date", date_add(col("order_date"), col("delivery_days").cast("int"))
+    )
 )
 
 # Dropping unit price formatted as it has same value of unit price
@@ -359,10 +396,14 @@ df_extra = df_extra.drop(col("unit_price_formatted"), col("total_amount"))
 # COMMAND ----------
 
 # dim customer
-df_cust = spark.read.table(f"{catalog_name}.{schema_name}.dim_customers").filter(col("is_active") == True)
+df_cust = spark.read.table(f"{catalog_name}.{schema_name}.dim_customers").filter(
+    col("is_active") == True
+)
 
 # dim products
-df_prod = spark.read.table(f"{catalog_name}.{schema_name}.dim_products").filter(col("is_active") == True)
+df_prod = spark.read.table(f"{catalog_name}.{schema_name}.dim_products").filter(
+    col("is_active") == True
+)
 
 # dim payment methods
 df_pay_mts = spark.read.table(f"{catalog_name}.{schema_name}.dim_payment_mts")
@@ -371,19 +412,27 @@ df_pay_mts = spark.read.table(f"{catalog_name}.{schema_name}.dim_payment_mts")
 
 # Joining final results based on dim customer table and exchanging customer_id with customer_sk
 df_cust_join = (
-    df_extra.join(df_cust, "customer_id", "inner").select(df_extra["*"], df_cust["customer_sk"]).drop("customer_id")
+    df_extra.join(df_cust, "customer_id", "inner")
+    .select(df_extra["*"], df_cust["customer_sk"])
+    .drop("customer_id")
 )
 
 # Joining customer results based on dim payments methods table and exchanging payment_method with payment_sk
 df_pm_join = (
-    df_cust_join.join(df_pay_mts, upper(df_cust_join["payment_method"]) == upper(df_pay_mts["payment_method"]), "inner")
+    df_cust_join.join(
+        df_pay_mts,
+        upper(df_cust_join["payment_method"]) == upper(df_pay_mts["payment_method"]),
+        "inner",
+    )
     .select(df_cust_join["*"], df_pay_mts["payment_sk"])
     .drop("payment_method")
 )
 
 # Joining payment method results based on dim products table and exchanging product_id with product_sk
 df_prod_join = (
-    df_pm_join.join(df_prod, "product_id", "inner").select(df_pm_join["*"], df_prod["product_sk"]).drop("product_id")
+    df_pm_join.join(df_prod, "product_id", "inner")
+    .select(df_pm_join["*"], df_prod["product_sk"])
+    .drop("product_id")
 )
 
 # Selecting the final values to be displayed in a returns table.

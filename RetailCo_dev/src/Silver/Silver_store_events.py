@@ -4,12 +4,14 @@
 
 # COMMAND ----------
 
-from pyspark.sql.types import *
-from pyspark.sql.functions import *
+import json
+import os
 from datetime import datetime
-from pyspark.sql.window import Window
+
 from delta.tables import DeltaTable
-import os, json
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+from pyspark.sql.window import Window
 
 # COMMAND ----------
 
@@ -62,7 +64,11 @@ else:
 path = "/Volumes/retailco/retailco_schema/bronze/store_events/"
 
 ##Data should be greater than last batch run - Incremental loading
-df_store_events = spark.read.format("delta").load(path).filter(col("ingested_timestamp") > lit(max_timestamp))
+df_store_events = (
+    spark.read.format("delta")
+    .load(path)
+    .filter(col("ingested_timestamp") > lit(max_timestamp))
+)
 
 # if count of our data is zero, Need to get out from this notebook(It will skip it)
 # and inserting in our job logs with value as 0, else continue..
@@ -89,7 +95,15 @@ init_cnt = df_store_events.count()
 
 window_val = Window.partitionBy(col("row_hash")).orderBy(col("ingested_timestamp"))
 
-un_col = ["_rescued_data", "Ingested_timestamp", "file_name", "Job_id", "Run_id", "folder_path", "record_hash"]
+un_col = [
+    "_rescued_data",
+    "Ingested_timestamp",
+    "file_name",
+    "Job_id",
+    "Run_id",
+    "folder_path",
+    "record_hash",
+]
 cols = []
 print(df_store_events.count())
 for i in df_store_events.columns:
@@ -98,7 +112,11 @@ for i in df_store_events.columns:
 
 df_hash = df_store_events.withColumn("row_hash", sha2(concat_ws("-", *cols), 256))
 
-df = df_hash.withColumn("rn", row_number().over(window_val)).filter(col("rn") == 1).drop(col("rn"))
+df = (
+    df_hash.withColumn("rn", row_number().over(window_val))
+    .filter(col("rn") == 1)
+    .drop(col("rn"))
+)
 # display(df.limit(10))
 # print(df.count())
 
@@ -147,7 +165,6 @@ display(df_standardize.limit(10))
 
 # COMMAND ----------
 
-import os
 
 path = os.path.abspath("../../config_files/silver_configs/silver_store_events_dq.json")
 with open(path, "r") as f:
@@ -164,22 +181,36 @@ with open(path, "r") as f:
             final_cnt = older_count - new_count
             total_checks += 1
             perc += 1 - (final_cnt / older_count)
-            print(f"No of records dropped due to {i['check']} check for {i['col_name']} is {older_count - new_count}")
+            print(
+                f"No of records dropped due to {i['check']} check for {i['col_name']} is {older_count - new_count}"
+            )
 
         # Date DataType check
-        if i["check"] == "date_dataType_check" and i["check_type"] != None and i["enabled"] == True:
+        if (
+            i["check"] == "date_dataType_check"
+            and i["check_type"] != None
+            and i["enabled"] == True
+        ):
             old_cnt = df.count()
-            df = df.filter(col(f"{i['col_name']}").try_cast(f"{i['check_type']}").isNotNull()).withColumn(
+            df = df.filter(
+                col(f"{i['col_name']}").try_cast(f"{i['check_type']}").isNotNull()
+            ).withColumn(
                 f"{i['col_name']}", col(f"{i['col_name']}").cast(f"{i['check_type']}")
             )
             new_count = df.count()
             final_cnt = old_cnt - new_count
             total_checks += 1
             perc += 1 - (final_cnt / old_cnt)
-            print(f"No of records dropped due to {i['check']} check for {i['col_name']} is {final_cnt}")
+            print(
+                f"No of records dropped due to {i['check']} check for {i['col_name']} is {final_cnt}"
+            )
 
         # sequence check
-        if i["check"] == "Sequence_ck" and i["check_list"] != None and i["enabled"] == True:
+        if (
+            i["check"] == "Sequence_ck"
+            and i["check_list"] != None
+            and i["enabled"] == True
+        ):
             old_cnt = df.count()
             if type(i["check_list"]) == list:
                 df = df.filter(~(col(f"{i['col_name']}").isin(f"{i['check_list']}")))
@@ -187,7 +218,9 @@ with open(path, "r") as f:
                 final_cnt = old_cnt - new_count
                 total_checks += 1
                 perc += 1 - (final_cnt / old_cnt)
-                print(f"No of records dropped due to {i['check']} check for {i['col_name']} is {final_cnt}")
+                print(
+                    f"No of records dropped due to {i['check']} check for {i['col_name']} is {final_cnt}"
+                )
     print("Data Quality Perc is : ", (perc / total_checks) * 100)
 df_dq = df
 # #Not Null Checks
@@ -234,7 +267,9 @@ df_dq = (
 # COMMAND ----------
 
 # dim customers
-df_cust = spark.read.table("retailco.retailco_schema.dim_customers").filter(col("is_active") == True)
+df_cust = spark.read.table("retailco.retailco_schema.dim_customers").filter(
+    col("is_active") == True
+)
 
 # fact_orders
 df_ord = spark.read.table("retailco.retailco_schema.fact_orders")
@@ -244,12 +279,16 @@ df_return_ents = spark.read.table("retailco.retailco_schema.dim_return_events")
 
 # Joining final results based on dim customer table and exchanging customer_id with customer_sk
 df_cust_join = (
-    df_dq.join(df_cust, "customer_id", "inner").select(df_dq["*"], df_cust["customer_sk"]).drop("customer_id")
+    df_dq.join(df_cust, "customer_id", "inner")
+    .select(df_dq["*"], df_cust["customer_sk"])
+    .drop("customer_id")
 )
 
 # Joining customer results based on  fact orders table and exchanging order_id with order_sk
 df_ord_join = (
-    df_cust_join.join(df_ord, "order_id", "inner").select(df_cust_join["*"], df_ord["order_sk"]).drop("order_id")
+    df_cust_join.join(df_ord, "order_id", "inner")
+    .select(df_cust_join["*"], df_ord["order_sk"])
+    .drop("order_id")
 )
 
 # Joining orders results based on dim return events table and exchanging event_type with event_type_id

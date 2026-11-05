@@ -62,7 +62,9 @@ df_net_gross_rev_monthly = spark.sql("""with cte as (
         order by trunc(order_date, 'MM');""")
 
 
-df_net_gross_rev_monthly.write.mode("overwrite").saveAsTable("retailco.retailco_schema.Monthly_Net_and_gross_revenue")
+df_net_gross_rev_monthly.write.mode("overwrite").saveAsTable(
+    "retailco.retailco_schema.Monthly_Net_and_gross_revenue"
+)
 
 # COMMAND ----------
 
@@ -143,7 +145,9 @@ top_5_customers_with_orders = spark.sql("""with cte as (
         order by total_orders desc;""")
 
 
-top_5_customers_with_orders.write.mode("overwrite").saveAsTable("retailco.retailco_schema.top_5_customers_with_orders")
+top_5_customers_with_orders.write.mode("overwrite").saveAsTable(
+    "retailco.retailco_schema.top_5_customers_with_orders"
+)
 
 # COMMAND ----------
 
@@ -259,7 +263,9 @@ total_quantity_sold = spark.sql("""with cte as (
         ) select sum(quantity) as total_qty_sold from non_dup_cte
         where status in ('Shipped', 'Delivered');""")
 
-total_quantity_sold.write.mode("overwrite").saveAsTable("retailco.retailco_schema.total_quantity_sold")
+total_quantity_sold.write.mode("overwrite").saveAsTable(
+    "retailco.retailco_schema.total_quantity_sold"
+)
 
 # COMMAND ----------
 
@@ -288,7 +294,9 @@ order_Fulfillment_rate = spark.sql("""with cte as (
 # group by status;
 # where status in ('Shipped', 'Delivered');
 
-order_Fulfillment_rate.write.mode("overwrite").saveAsTable("retailco.retailco_schema.order_Fulfillment_rate")
+order_Fulfillment_rate.write.mode("overwrite").saveAsTable(
+    "retailco.retailco_schema.order_Fulfillment_rate"
+)
 
 # COMMAND ----------
 
@@ -312,7 +320,9 @@ cancellation_rate = spark.sql("""with cte as (
         select 
         concat(round((1 - ((total_orders - cancelled_orders) / total_orders))*100,2)  , '%') as order_cancellation_rate from val_cte;""")
 
-cancellation_rate.write.mode("overwrite").saveAsTable("retailco.retailco_schema.cancellation_rate")
+cancellation_rate.write.mode("overwrite").saveAsTable(
+    "retailco.retailco_schema.cancellation_rate"
+)
 
 # COMMAND ----------
 
@@ -335,7 +345,9 @@ return_rate = spark.sql("""with cte as (
         select 
         concat(round((1 - ((total_orders - returned_orders) / total_orders))*100,2)  , '%') as order_return_rate from val_cte;""")
 
-return_rate.write.mode("overwrite").saveAsTable("retailco.retailco_schema.order_return_rate")
+return_rate.write.mode("overwrite").saveAsTable(
+    "retailco.retailco_schema.order_return_rate"
+)
 
 # COMMAND ----------
 
@@ -352,4 +364,6 @@ avg_delivery_time = spark.sql("""with cte as (
         select * from cte where rn =  1
         ) select floor(avg(datediff(delivery_date, order_date))) as avg_days from non_dup_cte;""")
 
-avg_delivery_time.write.mode("overwrite").saveAsTable("retailco.retailco_schema.avg_delivery_time")
+avg_delivery_time.write.mode("overwrite").saveAsTable(
+    "retailco.retailco_schema.avg_delivery_time"
+)

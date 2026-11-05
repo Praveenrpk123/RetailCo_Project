@@ -4,12 +4,14 @@
 
 # COMMAND ----------
 
-from pyspark.sql.types import *
-from pyspark.sql.functions import *
-from pyspark.sql.window import Window
-from datetime import date, timedelta, datetime
-import os, json
+import json
+import os
+from datetime import date, datetime, timedelta
 from functools import reduce
+
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+from pyspark.sql.window import Window
 
 # COMMAND ----------
 
@@ -69,7 +71,11 @@ path = "/Volumes/retailco/retailco_schema/bronze/customers/"
 
 ##Data should be greater than last batch run - Incremental loading
 
-df = spark.read.format("delta").load(path).filter(col("ingested_timestamp") > lit(max_timestamp))
+df = (
+    spark.read.format("delta")
+    .load(path)
+    .filter(col("ingested_timestamp") > lit(max_timestamp))
+)
 
 # initial records count
 init_cnt = df.count()
@@ -151,7 +157,9 @@ df = (
 
 # COMMAND ----------
 
-window_val = Window.partitionBy(col("customer_id")).orderBy(desc(col("registration_date")))
+window_val = Window.partitionBy(col("customer_id")).orderBy(
+    desc(col("registration_date"))
+)
 df = df.withColumn("pk_record_cnt", row_number().over(window_val)).withColumn(
     "is_active", when(col("pk_record_cnt") != 1, False).otherwise(True)
 )
@@ -199,7 +207,9 @@ with open(path, "r") as f:
             final_cnt = older_count - new_count
             total_checks += 1
             perc += 1 - (final_cnt / older_count)
-            print(f"No of records dropped due to {i['check']} check for {i['col_name']} is {final_cnt}")
+            print(
+                f"No of records dropped due to {i['check']} check for {i['col_name']} is {final_cnt}"
+            )
 
         # starts with check for Customer_Id etc..
         if (
@@ -212,21 +222,30 @@ with open(path, "r") as f:
             older_count = df.count()
             if type(i["starts_with"]) == str:
                 # df = df.filter(col(f'{i["col_name"]}').startswith(f'{i["starts_with"]}'))
-                df = df.filter(col(f"{i['col_name']}").rlike(f"^{i['starts_with']}[0-9]+$"))
-                new_count = df.count()
-                final_cnt = older_count - new_count
-                total_checks += 1
-                perc += 1 - (final_cnt / older_count)
-                print(f"No of records dropped due to {i['check']} starts_with check for {i['col_name']} is {final_cnt}")
-            elif type(i["starts_with"]) == list:
                 df = df.filter(
-                    reduce(lambda x, y: x | y, [col(f'i["col_name"]').startswith(i) for i in i["starts_with"]])
+                    col(f"{i['col_name']}").rlike(f"^{i['starts_with']}[0-9]+$")
                 )
                 new_count = df.count()
                 final_cnt = older_count - new_count
                 total_checks += 1
                 perc += 1 - (final_cnt / older_count)
-                print(f"No of records dropped due to {i['check']} starts_with check for {i['col_name']} is {final_cnt}")
+                print(
+                    f"No of records dropped due to {i['check']} starts_with check for {i['col_name']} is {final_cnt}"
+                )
+            elif type(i["starts_with"]) == list:
+                df = df.filter(
+                    reduce(
+                        lambda x, y: x | y,
+                        [col('i["col_name"]').startswith(i) for i in i["starts_with"]],
+                    )
+                )
+                new_count = df.count()
+                final_cnt = older_count - new_count
+                total_checks += 1
+                perc += 1 - (final_cnt / older_count)
+                print(
+                    f"No of records dropped due to {i['check']} starts_with check for {i['col_name']} is {final_cnt}"
+                )
 
         # endswith check for email etc
         if (
@@ -240,20 +259,27 @@ with open(path, "r") as f:
             # reduce(lambda x, y : x | y , [col('customer_email').endswith(p) for p in suf])
             if type(i["ends_with"]) == list:
                 df = df.filter(
-                    reduce(lambda x, y: x | y, [col(f"{i['col_name']}").endswith(p) for p in i["ends_with"]])
+                    reduce(
+                        lambda x, y: x | y,
+                        [col(f"{i['col_name']}").endswith(p) for p in i["ends_with"]],
+                    )
                 )
                 new_count = df.count()
                 final_cnt = older_count - new_count
                 total_checks += 1
                 perc += 1 - (final_cnt / older_count)
-                print(f"No of records dropped due to {i['check']} ends_with check for {i['col_name']} is {final_cnt}")
+                print(
+                    f"No of records dropped due to {i['check']} ends_with check for {i['col_name']} is {final_cnt}"
+                )
             elif type(i["ends_with"]) == str:
                 df = df.filter(col(f"{i['col_name']}").endswith(f"{i['ends_with']}"))
                 new_count = df.count()
                 final_cnt = older_count - new_count
                 total_checks += 1
                 perc += 1 - (final_cnt / older_count)
-                print(f"No of records dropped due to {i['check']} ends_with check for {i['col_name']} is {final_cnt}")
+                print(
+                    f"No of records dropped due to {i['check']} ends_with check for {i['col_name']} is {final_cnt}"
+                )
 
         # phone_number_pattern_check
         if i["check"] == "phone" and i["col_name"] != None and i["enabled"] == True:
@@ -261,20 +287,32 @@ with open(path, "r") as f:
             df = df.withColumn(
                 f"{i['col_name']}",
                 when(
-                    (col(f"{i['col_name']}").startswith("+91")) & (length(col(f"{i['col_name']}")) == 13),
-                    substring(col(f"{i['col_name']}"), 4, length(col(f"{i['col_name']}"))).cast("bigint"),
+                    (col(f"{i['col_name']}").startswith("+91"))
+                    & (length(col(f"{i['col_name']}")) == 13),
+                    substring(
+                        col(f"{i['col_name']}"), 4, length(col(f"{i['col_name']}"))
+                    ).cast("bigint"),
                 )
                 .when(
-                    col(f"{i['col_name']}").startswith("91") & (length(col(f"{i['col_name']}")) == 10),
-                    substring(col(f"{i['col_name']}"), 1, length(col(f"{i['col_name']}"))).cast("bigint"),
+                    col(f"{i['col_name']}").startswith("91")
+                    & (length(col(f"{i['col_name']}")) == 10),
+                    substring(
+                        col(f"{i['col_name']}"), 1, length(col(f"{i['col_name']}"))
+                    ).cast("bigint"),
                 )
                 .when(
-                    col(f"{i['col_name']}").startswith("91") & (length(col(f"{i['col_name']}")) == 12),
-                    substring(col(f"{i['col_name']}"), 3, length(col(f"{i['col_name']}"))).cast("bigint"),
+                    col(f"{i['col_name']}").startswith("91")
+                    & (length(col(f"{i['col_name']}")) == 12),
+                    substring(
+                        col(f"{i['col_name']}"), 3, length(col(f"{i['col_name']}"))
+                    ).cast("bigint"),
                 )
                 .when(
-                    (col(f"{i['col_name']}").startswith("0")) & (length(col(f"{i['col_name']}")) == 11),
-                    substring(col(f"{i['col_name']}"), 2, length(col(f"{i['col_name']}"))).cast("bigint"),
+                    (col(f"{i['col_name']}").startswith("0"))
+                    & (length(col(f"{i['col_name']}")) == 11),
+                    substring(
+                        col(f"{i['col_name']}"), 2, length(col(f"{i['col_name']}"))
+                    ).cast("bigint"),
                 )
                 .when(
                     (~(col(f"{i['col_name']}").startswith("+91")))
@@ -288,32 +326,45 @@ with open(path, "r") as f:
             final_cnt = older_count - new_count
             total_checks += 1
             perc += 1 - (final_cnt / older_count)
-            print(f"No of records dropped due to {i['check']} check for {i['col_name']} is {final_cnt}")
+            print(
+                f"No of records dropped due to {i['check']} check for {i['col_name']} is {final_cnt}"
+            )
 
         # Date Validity i["check"]
         if i["check"] == "validity" and i["col_name"] != None and i["enabled"] == True:
             end_date = date.today() + timedelta(days=1)
             older_count = df.count()
-            df = df.withColumn(f"{i['col_name']}", to_date(col(f"{i['col_name']}"), "yyyy-MM-dd")).filter(
-                col(f"{i['col_name']}") <= end_date
-            )
+            df = df.withColumn(
+                f"{i['col_name']}", to_date(col(f"{i['col_name']}"), "yyyy-MM-dd")
+            ).filter(col(f"{i['col_name']}") <= end_date)
             new_count = df.count()
             final_cnt = older_count - new_count
             total_checks += 1
             perc += 1 - (final_cnt / older_count)
-            print(f"No of records dropped due to {i['check']} check for {i['col_name']} is {final_cnt}")
+            print(
+                f"No of records dropped due to {i['check']} check for {i['col_name']} is {final_cnt}"
+            )
 
         # datatype_validation and update
-        if i["check"] == "datatype_val" and i["check_type"] != None and i["col_name"] != None and i["enabled"] == True:
+        if (
+            i["check"] == "datatype_val"
+            and i["check_type"] != None
+            and i["col_name"] != None
+            and i["enabled"] == True
+        ):
             older_count = df.count()
-            df = df.filter(col(f"{i['col_name']}").cast(f"{i['check_type']}").isNotNull()).withColumn(
+            df = df.filter(
+                col(f"{i['col_name']}").cast(f"{i['check_type']}").isNotNull()
+            ).withColumn(
                 f"{i['col_name']}", col(f"{i['col_name']}").cast(f"{i['check_type']}")
             )
             new_count = df.count()
             final_cnt = older_count - new_count
             total_checks += 1
             perc += 1 - (final_cnt / older_count)
-            print(f"No of records dropped due to {i['check']} check for {i['col_name']} is {final_cnt}")
+            print(
+                f"No of records dropped due to {i['check']} check for {i['col_name']} is {final_cnt}"
+            )
 
     # Data Quality percent
     print("Data Quality Perc is : ", (perc / total_checks) * 100)
@@ -346,26 +397,36 @@ df = df.withColumn(
 # Region = ['North', 'East', 'South', 'Central', 'West']
 df = df.withColumn(
     "region",
-    when(col("region").isin("North", "East", "South", "Central", "West"), col("region")).when(
-        col("region").isNull() | col("region") == "", lit("Unknown")
-    ),
+    when(
+        col("region").isin("North", "East", "South", "Central", "West"), col("region")
+    ).when(col("region").isNull() | col("region") == "", lit("Unknown")),
 )
 
 # State -is Null Then Unknown
 df_stage = df.withColumn(
-    "state", when((col("state").isNull()) | (col("state") == lit("")), lit("Unknown")).otherwise(col("state"))
+    "state",
+    when((col("state").isNull()) | (col("state") == lit("")), lit("Unknown")).otherwise(
+        col("state")
+    ),
 )
 # display(df_stage)
 
 # COMMAND ----------
 
-window_val = Window.partitionBy(col("customer_id")).orderBy(desc(col("registration_date")))
+window_val = Window.partitionBy(col("customer_id")).orderBy(
+    desc(col("registration_date"))
+)
 # Adding effective from, effective to and ingested timestamp
 df_stage2 = (
-    df_stage.withColumn("lag_val", date_add(lag(col("registration_date")).over(window_val), -1))
+    df_stage.withColumn(
+        "lag_val", date_add(lag(col("registration_date")).over(window_val), -1)
+    )
     .withColumn(
         "effective_to",
-        when(col("lag_val").isNull(), to_date(date_format(lit("9999-12-31"), "yyyy-MM-dd"))).otherwise(col("lag_val")),
+        when(
+            col("lag_val").isNull(),
+            to_date(date_format(lit("9999-12-31"), "yyyy-MM-dd")),
+        ).otherwise(col("lag_val")),
     )
     .withColumnRenamed("registration_date", "effective_from")
     .withColumnRenamed("Ingested_timestamp", "ingested_timestamp")
@@ -422,7 +483,10 @@ if spark.catalog.tableExists("retailco.retailco_schema.dim_customers"):
         # Step 1: Doing left outer join with source and target table based on customer_id column
         match_df = df_final.join(
             target_df,
-            ((df_final["customer_id"] == target_df["customer_id"]) & (target_df["is_active"] == True)),
+            (
+                (df_final["customer_id"] == target_df["customer_id"])
+                & (target_df["is_active"] == True)
+            ),
             "left_outer",
         ).select(
             df_final["*"],
@@ -442,7 +506,8 @@ if spark.catalog.tableExists("retailco.retailco_schema.dim_customers"):
         )
         # Step 2: Getting only the records whose effective from is greater than targets effective from
         match_df = match_df.filter(
-            (col("effective_from") > col("tgt_effective_from")) | (col("tgt_effective_from").isNull())
+            (col("effective_from") > col("tgt_effective_from"))
+            | (col("tgt_effective_from").isNull())
         )
 
         # for insert all rows - filter the rows whose
@@ -450,11 +515,16 @@ if spark.catalog.tableExists("retailco.retailco_schema.dim_customers"):
         # target record hash will be null only when source doesn't matches
         # target and source record hash != meaning no EXACT Matching records.
         filter_hash_df = match_df.filter(
-            (col("record_hash") != col("tgt_record_hash")) | (col("tgt_record_hash").isNull())
-        ).withColumn("merge_key", concat_ws("||", col("customer_id"), col("customer_id")))
+            (col("record_hash") != col("tgt_record_hash"))
+            | (col("tgt_record_hash").isNull())
+        ).withColumn(
+            "merge_key", concat_ws("||", col("customer_id"), col("customer_id"))
+        )
 
         # find records to be updated - if target record hash is not null it means source and target is matching by key column
-        update_df = match_df.filter(col("tgt_record_hash").isNotNull()).withColumn("merge_key", lit(None))
+        update_df = match_df.filter(col("tgt_record_hash").isNotNull()).withColumn(
+            "merge_key", lit(None)
+        )
 
         # Union both
         union_df = filter_hash_df.union(update_df)

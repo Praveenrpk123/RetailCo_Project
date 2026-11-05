@@ -29,7 +29,9 @@ top_5_selling_prods = spark.sql(f"""
             where rk  <= 5;
         """)
 
-top_5_selling_prods.write.mode("overwrite").saveAsTable(f"{catalog_name}.{schema_name}.Top_5_selling_products_overall")
+top_5_selling_prods.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.Top_5_selling_products_overall"
+)
 
 # COMMAND ----------
 
