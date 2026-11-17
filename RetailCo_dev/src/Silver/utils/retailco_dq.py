@@ -45,7 +45,7 @@ class retailco_dq:
                     values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
                         '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
-            self.prac = (1 - (final_cnt / older_count)) * 100
+            self.perc = (1 - (final_cnt / older_count)) * 100
             if self.spark.catalog.tableExists(
                 f"{catalog_name}.{schema_name}.data_quality_logs"
             ):
@@ -102,7 +102,7 @@ class retailco_dq:
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
                     '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
-            self.prac = (1 - (final_cnt / older_count)) * 100
+            self.perc = (1 - (final_cnt / older_count)) * 100
             self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                 job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
@@ -133,7 +133,7 @@ class retailco_dq:
         df = df.filter(
             reduce(
                 lambda x, y: x | y,
-                [col(f"{col_name}").startswith(i) for i in starts_with],
+                [col(f"{col_name}").startswith(i) for i in starts_with]
             )
         )
         new_count = df.count()
@@ -146,7 +146,7 @@ class retailco_dq:
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
                     '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
-            self.prac = (1 - (final_cnt / older_count)) * 100
+            self.perc = (1 - (final_cnt / older_count)) * 100
             self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                 job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
@@ -183,7 +183,7 @@ class retailco_dq:
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
                     '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
-            self.prac = (1 - (final_cnt / older_count)) * 100
+            self.perc = (1 - (final_cnt / older_count)) * 100
             self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                 job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
@@ -226,7 +226,7 @@ class retailco_dq:
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
                     '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
-            self.prac = (1 - (final_cnt / older_count)) * 100
+            self.perc = (1 - (final_cnt / older_count)) * 100
             self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                 job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
@@ -248,28 +248,28 @@ class retailco_dq:
             when(
                 (col(f"{col_name}").startswith("+91"))
                 & (length(col(f"{col_name}")) == 13),
-                substring(col(f"{col_name}"), 4, length(col(f"{col_name}"))).cast(
+                expr(f"substring({col_name}, 4, length({col_name}))").cast(
                     "bigint"
                 ),
             )
             .when(
                 col(f"{col_name}").startswith("91")
                 & (length(col(f"{col_name}")) == 10),
-                substring(col(f"{col_name}"), 1, length(col(f"{col_name}"))).cast(
+                expr(f"substring({col_name}, 1, length({col_name}))").cast(
                     "bigint"
                 ),
             )
             .when(
                 col(f"{col_name}").startswith("91")
                 & (length(col(f"{col_name}")) == 12),
-                substring(col(f"{col_name}"), 3, length(col(f"{col_name}"))).cast(
+                expr(f"substring({col_name}, 3, length({col_name}))").cast(
                     "bigint"
                 ),
             )
             .when(
                 (col(f"{col_name}").startswith("0"))
                 & (length(col(f"{col_name}")) == 11),
-                substring(col(f"{col_name}"), 2, length(col(f"{col_name}"))).cast(
+                expr(f"substring({col_name}, 2, length({col_name}))").cast(
                     "bigint"
                 ),
             )
@@ -291,7 +291,7 @@ class retailco_dq:
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
                     '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
-            self.prac = (1 - (final_cnt / older_count)) * 100
+            self.perc = (1 - (final_cnt / older_count)) * 100
             self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                 job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
@@ -324,7 +324,7 @@ class retailco_dq:
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
                     '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
-            self.prac = (1 - (final_cnt / older_count)) * 100
+            self.perc = (1 - (final_cnt / older_count)) * 100
             self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                 job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
@@ -363,7 +363,7 @@ class retailco_dq:
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
                     '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
-            self.prac = (1 - (final_cnt / older_count)) * 100
+            self.perc = (1 - (final_cnt / older_count)) * 100
             self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                 job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
@@ -399,7 +399,7 @@ class retailco_dq:
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
                     '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
-            self.prac = (1 - (final_cnt / older_count)) * 100
+            self.perc = (1 - (final_cnt / older_count)) * 100
             self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                 job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
@@ -435,7 +435,7 @@ class retailco_dq:
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
                     '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
-            self.prac = (1 - (final_cnt / older_count)) * 100
+            self.perc = (1 - (final_cnt / older_count)) * 100
             self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                 job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
@@ -471,7 +471,7 @@ class retailco_dq:
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
                     '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
-            self.prac = (1 - (final_cnt / older_count)) * 100
+            self.perc = (1 - (final_cnt / older_count)) * 100
             self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                 job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
@@ -507,7 +507,7 @@ class retailco_dq:
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
                     '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
-            self.prac = (1 - (final_cnt / older_count)) * 100
+            self.perc = (1 - (final_cnt / older_count)) * 100
             self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                 job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
@@ -532,7 +532,7 @@ class retailco_dq:
         from pyspark.sql.functions import col
 
         older_count = df.count()
-        df = df.filter(col(f"{col_name}").isin(check_list))
+        df = df.filter(col(f"{col_name}").isin(*check_list))
         new_count = df.count()
         final_cnt = older_count - new_count
         self.total_checks += 1
@@ -543,7 +543,7 @@ class retailco_dq:
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
                     '{final_cnt}', '{self.perc}', current_timestamp())""")
         else:
-            self.prac = (1 - (final_cnt / older_count)) * 100
+            self.perc = (1 - (final_cnt / older_count)) * 100
             self.spark.sql(f"""insert into {catalog_name}.{schema_name}.data_quality_logs(
                 job_id , run_id , table_name, col_name , check_name  , records_read , records_dropped ,quality_perc, ingested_timestamp ) 
                 values ('{job_id}', '{run_id}', '{table_name}','{col_name}', '{check}', '{older_count}',
