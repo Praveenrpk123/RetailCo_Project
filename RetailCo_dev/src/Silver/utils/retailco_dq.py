@@ -133,7 +133,7 @@ class retailco_dq:
         df = df.filter(
             reduce(
                 lambda x, y: x | y,
-                [col(f"{col_name}").startswith(i) for i in starts_with]
+                [col(f"{col_name}").startswith(i) for i in starts_with],
             )
         )
         new_count = df.count()
@@ -240,7 +240,7 @@ class retailco_dq:
         self, job_id, run_id, table_name, check, df, col_name, catalog_name, schema_name
     ):
         print(f"starting {check} for the col {col_name}")
-        from pyspark.sql.functions import col, length, lit, substring, when
+        from pyspark.sql.functions import col, length, lit, expr, when
 
         older_count = df.count()
         df = df.withColumn(
@@ -248,30 +248,22 @@ class retailco_dq:
             when(
                 (col(f"{col_name}").startswith("+91"))
                 & (length(col(f"{col_name}")) == 13),
-                expr(f"substring({col_name}, 4, length({col_name}))").cast(
-                    "bigint"
-                ),
+                expr(f"substring({col_name}, 4, length({col_name}))").cast("bigint"),
             )
             .when(
                 col(f"{col_name}").startswith("91")
                 & (length(col(f"{col_name}")) == 10),
-                expr(f"substring({col_name}, 1, length({col_name}))").cast(
-                    "bigint"
-                ),
+                expr(f"substring({col_name}, 1, length({col_name}))").cast("bigint"),
             )
             .when(
                 col(f"{col_name}").startswith("91")
                 & (length(col(f"{col_name}")) == 12),
-                expr(f"substring({col_name}, 3, length({col_name}))").cast(
-                    "bigint"
-                ),
+                expr(f"substring({col_name}, 3, length({col_name}))").cast("bigint"),
             )
             .when(
                 (col(f"{col_name}").startswith("0"))
                 & (length(col(f"{col_name}")) == 11),
-                expr(f"substring({col_name}, 2, length({col_name}))").cast(
-                    "bigint"
-                ),
+                expr(f"substring({col_name}, 2, length({col_name}))").cast("bigint"),
             )
             .when(
                 (~(col(f"{col_name}").startswith("+91")))
