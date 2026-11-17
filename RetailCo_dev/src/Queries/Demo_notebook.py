@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
 # MAGIC %sql
 # MAGIC select * from retailco.retailco_schema.control_table;
 # MAGIC
@@ -337,7 +341,24 @@ ctl_table = DeltaTable.forName(spark, 'retailco.retailco_schema.dim_products')
 
 # COMMAND ----------
 
-df = spark.read.option('header', True).csv('/Volumes/retailco/retailco_schema/raw_data/customers/customers_2026-07-30_07:29.csv')
+from pyspark.sql.functions import * 
+col_name = "payment_method"
+    #   "check" : "sequence_ck",
+check_list = ["Credit Card", "Wallet", "Debit Card", "UPI", "COD", "Net Banking"]
+# check_list = ["Credit Card", "Wallet"]
+    #   "enabled" : true
+
+path = '/Volumes/retailco/retailco_schema/raw_data/orders/orders_2026-07-29_17:27'
+df  = spark.read.parquet(path)
+df = df.filter((col(f'{col_name}').isin(check_list)))
+# df.display()
+# df = df.filter((col(f'{col_name}').isin(["Credit Card", "Wallet", "Debit Card", "UPI", "COD", "Net Banking"])))
+df.display()
+# df = df.filter(~(col(f'{col_name}').isin(f'{check_list}')))
+
+# COMMAND ----------
+
+# df = spark.read.option('header', True).csv('/Volumes/retailco/retailco_schema/raw_data/customers/customers_2026-07-30_07:29.csv')
 df.createOrReplaceTempView('src_view')
 display(df)
 

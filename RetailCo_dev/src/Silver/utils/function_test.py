@@ -1,18 +1,18 @@
 # Databricks notebook source
-from retailco import retailCo_pipeline
 from datetime import datetime
+
+from retailco import retailCo_pipeline
+
 # datas
-src = 'src'
-tgt = 'tgt'
-table_name = 'table_name'
+src = "src"
+tgt = "tgt"
+table_name = "table_name"
 max_dt = datetime.now()
 
-#object_creation
+# object_creation
 rtc_pipeline = retailCo_pipeline(spark)
-rtc_pipeline.control_table(src,tgt, table_name,max_dt)
+rtc_pipeline.control_table(src, tgt, table_name, max_dt)
 # rtc_pipeline.job_logs()
-
-
 
 
 # COMMAND ----------

@@ -1,0 +1,49 @@
+# .github/workflows/ci.yml
+name: CI — Validate Bundle
+concurrency: 1
+on:
+  push:
+    branches: 
+      - main
+    paths:
+      - 'RetailCo_dev/**'
+
+jobs:
+  deploy:
+    name: 'Deploy DAB Bundle'
+    runs-on: ubuntu-latest
+    defaults:
+     run:
+        working-directory: RetailCo_dev
+    # env:
+    #   DATABRICKS_AUTH_TYPE: github-oidc
+    #   DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+    #   DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: databricks/setup-cli@main
+
+      - name: Validate bundle
+        run: databricks bundle validate --target dev
+        working-directory: RetailCo_dev
+        env:
+          DATABRICKS_TOKEN: ${{secrets.dev_token}}
+          DATABRICKS_BUNDLE_ENV: dev
+        
+      - name: bundle summary
+        run: databricks bundle summary --target dev
+        working-directory: RetailCo_dev
+        env:
+          DATABRICKS_TOKEN: ${{secrets.dev_token}}
+          DATABRICKS_BUNDLE_ENV: dev
+
+      - name: Show diff (plan)
+        run: databricks bundle plan --target dev
+
+      - name: deploy bundle
+        run: databricks bundle deploy --target dev
+        working-directory: RetailCo_dev
+        env:
+          DATABRICKS_TOKEN: ${{secrets.dev_token}}
+          DATABRICKS_BUNDLE_ENV: dev

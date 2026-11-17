@@ -1,7 +1,7 @@
 # Databricks notebook source
 # Declare the widget (required, even when running as a job) -- coming from DAB
-dbutils.widgets.text("catalog_name","RetailCo_Dev_Catalog")
-dbutils.widgets.text("schema_name", "RetailCo_Dev_schema")
+dbutils.widgets.text("catalog_name", "")
+dbutils.widgets.text("schema_name", "")
 
 # Retrieve the value
 catalog_name = dbutils.widgets.get("catalog_name")
@@ -22,10 +22,9 @@ new_customers_this_month = spark.sql(f"""with cte as (
     select  count(customer_id) as cnt from cte where rn = 1 and effective_from >= current_month_start_date;""")
 
 
-new_customers_this_month.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.new_customers_this_month")
+new_customers_this_month.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.new_customers_this_month"
+)
 
 
 # COMMAND ----------
@@ -44,10 +43,9 @@ new_customers_90_days = spark.sql(f"""with cte as (
     select count(*) as New_customers_1_year from cte 
     where effective_from >= effective_start_date and rn = 1;""")
 
-new_customers_90_days.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.new_customers_90_days")
+new_customers_90_days.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.new_customers_90_days"
+)
 
 # COMMAND ----------
 
@@ -65,10 +63,9 @@ new_customers_180_days = spark.sql(f"""with cte as (
     from {catalog_name}.{schema_name}.dim_customers) 
     select count(*) as New_customers_1_year from cte where effective_from >= effective_start_date;""")
 
-new_customers_180_days.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.new_customers_180_days")
+new_customers_180_days.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.new_customers_180_days"
+)
 
 # COMMAND ----------
 
@@ -86,10 +83,9 @@ new_customers_1_year = spark.sql(f"""with cte as (
     select count(customer_id) as New_customers_1_year from cte 
     where effective_from >= effective_start_date and rn = 1;""")
 
-new_customers_1_year.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.new_customers_1_year")
+new_customers_1_year.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.new_customers_1_year"
+)
 
 # COMMAND ----------
 
@@ -115,10 +111,9 @@ order by no_of_customers desc)
 select effective_start_date, no_of_customers from top_5_customer_count
 where rnk <= 5;""")
 
-top_5_month_with_highest_customer.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.top_5_month_with_highest_customer")
+top_5_month_with_highest_customer.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.top_5_month_with_highest_customer"
+)
 
 
 # COMMAND ----------
@@ -133,10 +128,9 @@ active_customers_in_each_segment = spark.sql(f"""select segment, count(*)  as no
 where is_active = true
 group by segment;""")
 
-active_customers_in_each_segment.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.active_customers_in_each_segment")
+active_customers_in_each_segment.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.active_customers_in_each_segment"
+)
 
 # COMMAND ----------
 
@@ -150,7 +144,6 @@ active_customers_in_each_region = spark.sql(f"""select region, count(*)  as no_o
 where is_active = true
 group by region;""")
 
-active_customers_in_each_region.\
-    write.\
-    mode("overwrite").\
-    saveAsTable(f"{catalog_name}.{schema_name}.active_customers_in_each_region")
+active_customers_in_each_region.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.active_customers_in_each_region"
+)

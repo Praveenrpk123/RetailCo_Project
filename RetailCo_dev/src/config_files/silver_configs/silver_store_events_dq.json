@@ -12,13 +12,13 @@
     }, 
     {
       "col_name" : "event_type",
-      "check" : "Sequence_ck",
+      "check" : "sequence_ck",
       "check_list" : ["order_placed", "checkout_start", "payment_initiated", "add_to_cart", "page_view", "order_cancelled"],
       "enabled" : true
     },
     {
       "col_name" : "device",
-      "check" : "Sequence_ck",
+      "check" : "sequence_ck",
       "check_list" : ["Web", "Ios", "Android", "Tablet"],
       "enabled" : true
     },

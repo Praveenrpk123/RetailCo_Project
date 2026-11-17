@@ -12,8 +12,8 @@
 # COMMAND ----------
 
 # Declare the widget (required, even when running as a job) -- coming from DAB
-dbutils.widgets.text("catalog_name","RetailCo_Dev_Catalog")
-dbutils.widgets.text("schema_name", "RetailCo_Dev_schema")
+dbutils.widgets.text("catalog_name", "")
+dbutils.widgets.text("schema_name", "")
 
 # Retrieve the value
 catalog_name = dbutils.widgets.get("catalog_name")
@@ -32,10 +32,9 @@ order by order_sk, rn),
 dedup_order_sk(select * from cte where rn = 1)
 select count(*) as total_orders_returned from dedup_order_sk;""")
 
-total_orders_returned.\
-    write.\
-    mode('overwrite').\
-    saveAsTable(f"{catalog_name}.{schema_name}.total_orders_returned")
+total_orders_returned.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.total_orders_returned"
+)
 
 # COMMAND ----------
 
@@ -59,10 +58,9 @@ where rk <= 5
 order by S_no;""")
 
 
-total_prod_returned.\
-    write.\
-    mode('overwrite').\
-    saveAsTable(f"{catalog_name}.{schema_name}.top_5_products_returned_most")
+total_prod_returned.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.top_5_products_returned_most"
+)
 
 # COMMAND ----------
 
@@ -86,10 +84,9 @@ join {catalog_name}.{schema_name}.dim_customers dc on dc.customer_sk = stage_cte
 where rk <= 5
 order by S_no;""")
 
-customers_returned_most.\
-    write.\
-    mode('overwrite').\
-    saveAsTable(f"{catalog_name}.{schema_name}.top_5_customers_returned_most")
+customers_returned_most.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.top_5_customers_returned_most"
+)
 
 # COMMAND ----------
 
@@ -107,7 +104,6 @@ round(sum(gross_amount)) as gross_amount,
 round(sum(net_amount)) as net_amount
 from dedup_order_sk;""")
 
-Amount_refunded_upn.\
-    write.\
-    mode('overwrite').\
-    saveAsTable(f"{catalog_name}.{schema_name}.total_Amount_refunded_vs_net")
+Amount_refunded_upn.write.mode("overwrite").saveAsTable(
+    f"{catalog_name}.{schema_name}.total_Amount_refunded_vs_net"
+)

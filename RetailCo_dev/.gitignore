@@ -9,3 +9,4 @@ scratch/**
 **/explorations/**
 **/!explorations/README.md
 resources/jobs/demo_job.yml
+src/Queries/Demo_notebook.py
