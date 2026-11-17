@@ -240,7 +240,7 @@ class retailco_dq:
         self, job_id, run_id, table_name, check, df, col_name, catalog_name, schema_name
     ):
         print(f"starting {check} for the col {col_name}")
-        from pyspark.sql.functions import col, length, lit, expr, when
+        from pyspark.sql.functions import col, expr, length, lit, when
 
         older_count = df.count()
         df = df.withColumn(
